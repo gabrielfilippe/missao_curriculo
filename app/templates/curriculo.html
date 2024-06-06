@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}Cadastro de curriculo{% endblock %}
+
+{% block content %}
+  
+{% for message in messages %}
+{% if message.tags == 'error' %}
+<div class="alert alert-danger alert-dismissible fade show mt-3 mb-0" role="alert" id="message">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+
+{% if message.tags == 'success' %}
+<div class="alert alert-success alert-dismissible fade show mt-3 mb-0" role="alert" id="message">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+
+{% endfor %}
+
+<form action="" method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+    <div class="card my-3">
+        <div class="card-header">
+            Informações do currículo
+        </div>
+        <div class="row p-3">
+            <div class="col-sm-6 col-md-3 col-lg-3">
+                {{ form.nome|as_crispy_field }}
+            </div>
+            <div class="col-sm-6 col-md-3 col-lg-3">
+                {{ form.genero|as_crispy_field }}
+            </div>
+            <div class="col-sm-6 col-md-3 col-lg-3">
+                {{ form.email|as_crispy_field }}
+            </div>
+            <div class="col-sm-6 col-md-3 col-lg-3">
+                {{ form.telefone|as_crispy_field }}
+            </div>
+            <div class="col-sm-6 col-md-3 col-lg-3">
+                {{ form.endereco|as_crispy_field }}
+            </div>
+            <div class="col-sm-6 col-md-3 col-lg-3">
+                {{ form.data_de_nascimento|as_crispy_field }}
+            </div>
+            <div class="col-sm-6 col-md-3 col-lg-3">
+                {{ form.objetivo_profissional|as_crispy_field }}
+            </div>
+            <div class="col-sm-6 col-md-3 col-lg-3">
+                {{ form.status|as_crispy_field }}
+            </div>
+            <div class="col-sm-6 col-md-3 col-lg-3">
+                {{ form.insercao|as_crispy_field }}
+            </div>
+            <div class="col-sm-6 col-md-3 col-lg-3">
+                {{ form.cidade_estado|as_crispy_field }}
+            </div>
+            <div class="col-sm-6 col-md-3 col-lg-3">
+                {{ form.edicao|as_crispy_field }}
+            </div>
+            <div class="col-sm-6 col-md-3 col-lg-3">
+                {{ form.usuario_insercao|as_crispy_field }}
+            </div>
+            <div class="col-sm-6 col-md-3 col-lg-3">
+                {{ form.usuario_edicao|as_crispy_field }}
+            </div>
+            <div class="col-sm-6 col-md-3 col-lg-3">
+                {{ form.foto|as_crispy_field }}
+            </div>
+            <div class="col-12 d-flex justify-content-center">
+                <button class="btn btn-success w-100 mt-3" type="submit">
+                    Salvar currículo
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+{% endblock %}
+{% block javascript %}
+<script>
+    setTimeout(function () {
+        $("#message").alert('close');
+    }, 3000);
+</script>
+{% endblock %}

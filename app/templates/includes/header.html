@@ -1,0 +1,38 @@
+{% load static %}
+
+<header class="fixed-top">
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample"
+                aria-controls="navbarsExample" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand text-uppercase fw-bold col-md-3 me-0 d-block d-md-none" href="#">
+                Currículo
+            </a>
+            <div class="collapse navbar-collapse d-md-flex" id="navbarsExample">
+                <a class="navbar-brand text-uppercase fw-bold col-md-3 me-0 d-none d-md-block" href="#">
+                    Currículo
+                </a>
+                <ul class="navbar-nav col-md-6 justify-content-md-center">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/curriculo/' %}active{% endif %} link" href="{% url 'index' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/curriculo/pessoas/' %}active{% endif %} link" href="{% url 'pessoas' %}">Pessoas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/curriculo/criar_curriculo/' %}active{% endif %} link" href="{% url 'criar_curriculo' %}">Criar Currículo</a>
+                    </li>
+                </ul>
+                <div class="d-md-flex col-md-3 justify-content-md-end">
+                    {% if user.is_authenticated %}
+                    <button class="btn btn-outline-light btn-logout">Sair</button>
+                    {% else %}
+                    <a class="btn btn-outline-light btn-login" href="#">Entrar</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
