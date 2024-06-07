@@ -17,10 +17,28 @@ header {
     flex-shrink: 0;
 }
 
-.link:hover {
-    color: aqua;
+/* Adiciona uma linha embaixo do link ao passar o mouse */
+.navbar-nav .nav-link {
+    position: relative; /* Para posicionar o elemento filho (linha) em relação ao elemento pai (link) */
 }
 
+.navbar-nav .nav-link:after {
+    content: '';
+    position: absolute;
+    left: 50%; /* Posiciona a linha no meio inicialmente */
+    bottom: 4px;
+    width: 0%; /* Inicialmente, a largura da linha é zero */
+    height: 2px;
+    background-color: white;
+    opacity: 0;
+    transition: width 0.3s ease-out, left 0.3s ease-out, opacity 0.3s; /* Adiciona uma transição suave para largura, posição e opacidade */
+}
+
+.navbar-nav .nav-link:hover:after {
+    left: 0; /* Move a linha para a esquerda */
+    width: 100%; /* Aumenta a largura da linha para 100% */
+    opacity: 1; /* Torna a linha visível */
+}
 .content {
     flex-grow: 1;
     position: relative;
