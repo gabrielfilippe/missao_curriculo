@@ -2,8 +2,7 @@ from app.forms import *
 from app.models import * 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render
-from django.views.generic.edit import CreateView, UpdateView
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 
 # Create your views here.
@@ -31,6 +30,15 @@ def pessoas(request):
         'pessoas': pessoas
     }
     return render(request, 'pessoas.html', context)
+
+@login_required(login_url=reverse_lazy('admin:login'))
+def curriculos(request):
+    curriculos = Curriculo.objects.all()
+    context = {
+        'curriculos': curriculos
+    }
+
+    return render(request, 'curriculos.html', context)
 
 @login_required(login_url=reverse_lazy('admin:login'))
 def criar_curriculo(request):
@@ -81,7 +89,7 @@ def criar_curriculo(request):
 
 @login_required(login_url=reverse_lazy('admin:login'))
 def editar_curriculo(request, id):
-    curriculo = Curriculo.objects.get(id=id)
+    curriculo = get_object_or_404(Curriculo, id=id)
 
     if request.method == 'GET':
         curriculo_form = CurriculoForm(instance=curriculo)
@@ -114,7 +122,7 @@ def editar_curriculo(request, id):
             habilidade_formset.instance = curriculo
             habilidade_formset.save()
             messages.success(request, 'Currículo editado com sucesso!')
-            return redirect('editar_curriculo', id=id)
+            return redirect('curriculos')
         else:
             messages.error(request, 'Erro ao editar currículo!')
             context = {
@@ -127,3 +135,10 @@ def editar_curriculo(request, id):
             return render(request, 'editar_curriculo.html', context)
 
     return render(request, 'editar_curriculo.html')
+
+@login_required(login_url=reverse_lazy('admin:login'))
+def excluir_curriculo(request, id):
+    curriculo = get_object_or_404(Curriculo, id=id)
+    curriculo.delete()
+    messages.success(request, 'Currículo excluído com sucesso!')
+    return redirect('curriculos')
