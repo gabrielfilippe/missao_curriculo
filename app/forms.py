@@ -36,6 +36,9 @@ def custom_formset_factory(parent_model, model, form, formset=BaseInlineFormSet,
     return CustomFormSet
 
 class FormacaoForm(forms.ModelForm):
+    data_de_inicio = forms.DateField(widget=forms.TextInput(attrs={'type': 'date'}))
+    data_de_conclusao = forms.DateField(widget=forms.TextInput(attrs={'type': 'date'}))
+
     class Meta:
         model = Formacao
         fields = '__all__'
@@ -52,14 +55,13 @@ FormacaoFormSet = custom_formset_factory(
     extra=1,
     can_delete=True,
     can_delete_extra=True,
-    widgets={
-        'data_de_inicio': forms.DateInput(attrs={'type': 'date'}),
-        'data_de_conclusao': forms.DateInput(attrs={'type': 'date'}),
-    },
     formset=CustomBaseInlineFormSet
 )
 
 class ExperienciaForm(forms.ModelForm):
+    data_de_inicio = forms.DateField(widget=forms.TextInput(attrs={'type': 'date'}))
+    data_de_saida = forms.DateField(widget=forms.TextInput(attrs={'type': 'date'}))
+
     class Meta:
         model = Experiencia
         fields = '__all__'
@@ -72,8 +74,6 @@ ExperienciaFormSet = custom_formset_factory(
     can_delete=True,
     can_delete_extra=True,
     widgets={
-        'data_de_inicio': forms.DateInput(attrs={'type': 'date'}),
-        'data_de_saida': forms.DateInput(attrs={'type': 'date'}),
         'descricao': forms.Textarea(attrs={'rows': 3, 'cols': 40}),
     },
     formset=CustomBaseInlineFormSet
