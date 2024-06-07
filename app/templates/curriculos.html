@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Curriculos{% endblock %}
+
+{% block content %}
+
+{% if messages %}
+{% for message in messages %}
+{% if message.tags == 'success' %}
+<div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" id="message">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+{% endfor %}
+{% endif %}
+
+<!-- Tabela -->
+ <div class="card mt-3">
+    <div class="card-header">
+        Curriculos
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered table-responsive mb-0 text-center align-middle">
+                <caption>Lista de curriculos</caption>
+                <thead>
+                    <tr class="align-middle">
+                        <th>Pessoa</th>
+                        <th>Formações</th>
+                        <th>Experiências</th>
+                        <th>Habilidades</th>
+                        <th>Criado em</th>
+                        <th>Atualizado em</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for curriculo in curriculos %}
+                    <tr>
+                        <td>{{ curriculo.pessoa }}</td>
+                        <td>
+                            {% if curriculo.formacoes %}
+                            {% for formacao in curriculo.formacoes.all %}
+                            <span>{{ formacao.curso }}</span><br>
+                            {% endfor %}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if curriculo.experiencias %}
+                            {% for experiencia in curriculo.experiencias.all %}
+                            <span>{{ experiencia.cargo }}</span><br>
+                            {% endfor %}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if curriculo.habilidades %}
+                            {% for habilidade in curriculo.habilidades.all %}
+                            <span>{{ habilidade.nome }}</span><br>
+                            {% endfor %}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td>{{ curriculo.created_at|date:"d/m/Y H:i:s" }}</td>
+                        <td>{{ curriculo.updated_at|date:"d/m/Y H:i:s" }}</td>
+                        <td>
+                            <a href="{% url 'editar_curriculo' curriculo.id %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-edit me-1"></i>
+                                Editar
+                            </a>
+                            <a href="{% url 'excluir_curriculo' curriculo.id %}" class="btn btn-danger btn-sm">
+                                <i class="fas fa-trash-alt me-1"></i>
+                                Excluir
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+ </div>
+
+{% endblock content %}
+
