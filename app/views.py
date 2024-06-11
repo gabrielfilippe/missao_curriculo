@@ -9,7 +9,7 @@ from django.urls import reverse_lazy
 def index(request):
     user = request.user
     context = {'user': user}
-    return render(request, 'index.html', context)
+    return render(request, 'pages/home.html', context)
 
 @login_required(login_url=reverse_lazy('admin:login'))
 def pessoas(request):
@@ -29,7 +29,7 @@ def pessoas(request):
         'form': form,
         'pessoas': pessoas
     }
-    return render(request, 'pessoas.html', context)
+    return render(request, 'pages/pessoas.html', context)
 
 @login_required(login_url=reverse_lazy('admin:login'))
 def curriculos(request):
@@ -38,7 +38,7 @@ def curriculos(request):
         'curriculos': curriculos
     }
 
-    return render(request, 'curriculos.html', context)
+    return render(request, 'pages/curriculos.html', context)
 
 @login_required(login_url=reverse_lazy('admin:login'))
 def criar_curriculo(request):
@@ -55,7 +55,7 @@ def criar_curriculo(request):
             'habilidade_formset': habilidade_formset
         }
 
-        return render(request, 'criar_curriculo.html', context)
+        return render(request, 'pages/criar_curriculo.html', context)
     elif request.method == 'POST':
         curriculo_form = CurriculoForm(request.POST)
         formacao_formset = FormacaoFormSet(request.POST)
@@ -83,9 +83,9 @@ def criar_curriculo(request):
                 'habilidade_formset': habilidade_formset
             }
 
-            return render(request, 'criar_curriculo.html', context)
+            return render(request, 'pages/criar_curriculo.html', context)
 
-    return render(request, 'criar_curriculo.html')
+    return render(request, 'pages/criar_curriculo.html')
 
 @login_required(login_url=reverse_lazy('admin:login'))
 def editar_curriculo(request, id):
@@ -104,7 +104,7 @@ def editar_curriculo(request, id):
             'habilidade_formset': habilidade_formset
         }
 
-        return render(request, 'editar_curriculo.html', context)
+        return render(request, 'pages/editar_curriculo.html', context)
     elif request.method == 'POST':
         curriculo_form = CurriculoForm(request.POST, instance=curriculo)
         formacao_formset = FormacaoFormSet(request.POST, instance=curriculo)
@@ -132,9 +132,9 @@ def editar_curriculo(request, id):
                 'habilidade_formset': habilidade_formset
             }
 
-            return render(request, 'editar_curriculo.html', context)
+            return render(request, 'pages/editar_curriculo.html', context)
 
-    return render(request, 'editar_curriculo.html')
+    return render(request, 'pages/editar_curriculo.html')
 
 @login_required(login_url=reverse_lazy('admin:login'))
 def excluir_curriculo(request, id):
@@ -142,3 +142,33 @@ def excluir_curriculo(request, id):
     curriculo.delete()
     messages.success(request, 'Currículo excluído com sucesso!')
     return redirect('curriculos')
+
+
+#sistema de filtragem
+@login_required(login_url=reverse_lazy('admin:login'))
+def filtrar_curriculo(request):
+    form = CurriculoFilterForm(request.GET or None)
+    curriculos = Curriculo.objects.none()
+
+    if form.is_valid():
+        curriculos = Curriculo.objects.all()
+        nome = form.cleaned_data.get('nome')
+        sobrenome = form.cleaned_data.get('sobrenome')
+        sexo = form.cleaned_data.get('sexo')
+
+        if nome:
+            curriculos = curriculos.filter(pessoa__nome__icontains=nome)
+        if sobrenome:
+            curriculos = curriculos.filter(pessoa__sobrenome__icontains=sobrenome)
+        if sexo:
+            curriculos = curriculos.filter(pessoa__sexo=sexo)
+
+    # Obter as pessoas que têm currículos
+    pessoas_com_curriculo = Pessoa.objects.filter(curriculo__in=curriculos)
+
+    context = {
+        'form': form,
+        'pessoas_com_curriculo': pessoas_com_curriculo
+    }
+
+    return render(request, 'pages/filtrar_curriculo.html', context)
