@@ -93,3 +93,13 @@ HabilidadeFormSet = custom_formset_factory(
     can_delete_extra=True,
     formset=CustomBaseInlineFormSet
 )
+
+
+#Criando o filtro de pesquisa
+
+class CurriculoFilterForm(forms.Form):
+     nome = forms.CharField(max_length=255, required=False, label='Nome')
+     sobrenome = forms.CharField(max_length=255, required=False, label='Sobrenome')
+     sexo = forms.ChoiceField(choices=[('', 'Selecione um sexo')] + SEXO, required=False, label='Sexo')
+
+#Depois desse arquivo, tem que criar uma rota no urls.py
