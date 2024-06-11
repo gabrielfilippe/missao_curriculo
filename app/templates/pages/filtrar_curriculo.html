@@ -1,0 +1,25 @@
+{% extends 'base/base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}Filtrar currículo{% endblock %}
+
+{% block content %}
+<h1>Filtrar Currículos</h1>
+
+<form action="" method="get" class="needs-validation" enctype="multipart/form-data" autocomplete="off" novalidate>
+    {{ form|crispy }}
+    <button type="submit" class="btn btn-primary">Filtrar</button>
+    <h2>Resultados</h2>
+    <ul>
+        {% if pessoas_com_curriculo %}
+            {% for pessoa in pessoas_com_curriculo %}
+                <li>{{ pessoa.nome }} {{ pessoa.sobrenome }} - {{ pessoa.get_sexo_display }}</li>
+            {% endfor %}
+        {% else %}
+            <li>Nenhum currículo encontrado.</li>
+        {% endif %}
+    </ul>
+</form>
+
+{% endblock content %}
