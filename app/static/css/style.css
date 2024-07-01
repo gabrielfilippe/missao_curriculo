@@ -39,6 +39,7 @@ header {
     width: 100%; /* Aumenta a largura da linha para 100% */
     opacity: 1; /* Torna a linha visível */
 }
+
 .content {
     flex-grow: 1;
     position: relative;

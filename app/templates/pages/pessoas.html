@@ -5,63 +5,6 @@
 {% block title %}Pessoas{% endblock %}
 
 {% block content %}
-
-{% if messages %}
-{% for message in messages %}
-{% if message.tags == 'success' %}
-<div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" id="message">
-    {{ message }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>
-{% endif %}
-{% endfor %}
-{% endif %}
-
-<!-- Button trigger modal -->
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-    <i class="fas fa-plus me-1"></i>
-    Adicionar pessoa
-</button>
-
-<!-- Modal -->
-<div class="modal fade {% if form.errors %}show d-block{% endif %}" id="exampleModal" tabindex="-1"
-    aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
-    <div class="modal-dialog modal-dialog-scrollable modal-xl">
-        <div class="modal-content">
-            <form action="" method="post" id="pessoaForm" novalidate>
-                {% csrf_token %}
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">Informações Pessoais</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
-                    {% if messages %}
-                    {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" id="message">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                    {% endfor %}
-                    {% endif %}
-                    <div class="container-fluid">
-                        {{ form|crispy }}
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i>
-                        Fechar
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i>
-                        Salvar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 <!-- Table -->
 <div class="card mt-3">
     <div class="card-header">
@@ -78,9 +21,14 @@
                         <th scope="col">Sexo</th>
                         <th scope="col">CPF</th>
                         <th scope="col">RG</th>
+                        <th scope="col">PCD</th>
+                        <th scope="col">CNH</th>
+                        <th scope="col">Primeiro emprego</th>
+                        <th scope="col">Imagem</th>
                         <th scope="col">E-mail</th>
                         <th scope="col">Telefone</th>
                         <th scope="col">Endereço</th>
+                        <th scope="col">Idiomas</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -92,23 +40,65 @@
                         <td>{{ pessoa.cpf }}</td>
                         <td>{{ pessoa.rg }}</td>
                         <td>
-                            {% if pessoa.email %}
-                            <a href="mailto:{{ pessoa.email }}" class="text-decoration-none">{{ pessoa.email }}</a>
+                            {% if pessoa.e_pcd %}
+                            Sim
+                            {% else %}
+                            Não
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if pessoa.possui_cnh %}
+                            Sim - ({{ pessoa.get_categoria_da_cnh_display }})
+                            {% else %}
+                            Não
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if pessoa.e_primeiro_emprego %}
+                            Sim
+                            {% else %}
+                            Não
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if pessoa.imagem %}
+                            <a href="{{ pessoa.imagem.url }}" target="_blank" class="text-decoration-none">Link para imagem</a>
                             {% else %}
                             -
                             {% endif %}
                         </td>
                         <td>
-                            {% if pessoa.telefone %}
-                            <a href="tel:{{ pessoa.telefone }}" class="text-decoration-none">{{ pessoa.telefone }}</a>
+                            {% if pessoa.contato.email %}
+                            <a href="mailto:{{ pessoa.contato.email }}" class="text-decoration-none">{{ pessoa.contato.email }}</a>
                             {% else %}
                             -
                             {% endif %}
                         </td>
                         <td>
-                            {% if pessoa.endereco %}
-                            {{ pessoa.endereco }}, {{ pessoa.numero }} - {{ pessoa.bairro }}<br>
-                            {{ pessoa.cidade }}/{{ pessoa.estado }} - {{ pessoa.cep }}
+                            {% if pessoa.contato.telefone %}
+                            <a href="tel:{{ pessoa.contato.telefone }}" class="text-decoration-none">{{ pessoa.contato.telefone }}</a>
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if pessoa.endereco.endereco %}
+                            {{ pessoa.endereco.endereco }}<br>
+                            {{ pessoa.endereco.numero }}<br>
+                            {{ pessoa.endereco.complemento }}<br>
+                            {{ pessoa.endereco.bairro }}<br>
+                            {{ pessoa.endereco.cidade }}<br>
+                            {{ pessoa.endereco.estado }}<br>
+                            {{ pessoa.endereco.cep }}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if pessoa.idioma_set.all %}
+                            {% for idioma in pessoa.idioma_set.all %}
+                            {{ idioma.nome }} - {{ idioma.get_nivel_display }}<br>
+                            {% endfor %}
                             {% else %}
                             -
                             {% endif %}
@@ -120,32 +110,4 @@
         </div>
     </div>
 </div>
-
 {% endblock content %}
-
-{% block javascript %}
-
-<script>
-    $(document).ready(function() {
-        // Se houver erros ao enviar o formulário, ao recarregar a página, o modal deve ser exibido apresentado os erros
-        if ({{ form.errors|length }} > 0) {
-            $('#exampleModal').modal('show');
-        }
-
-        // Limpar o formulário e remover as classes de erro ao fechar o modal
-        $('#exampleModal').on('hidden.bs.modal', function (e) {
-            $('#pessoaForm').find('.is-invalid').removeClass('is-invalid');
-            $('#pessoaForm').find('.invalid-feedback').remove();
-            $('#message').alert('close');
-            $('#exampleModal').removeClass('show d-block');
-            $('#pessoaForm')[0].reset();
-        });
-
-        // Quando abrir o modal, focar no primeiro campo
-        $('#exampleModal').on('shown.bs.modal', function (e) {
-            $('#id_nome').focus();
-        });
-    });
-</script>
-
-{% endblock javascript %}

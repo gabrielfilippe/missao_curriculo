@@ -2,145 +2,298 @@
 
 {% load crispy_forms_tags %}
 
-{% block title %}Criar currículo{% endblock %}
+{% block title %}Criar Currículo{% endblock %}
+
+{% block css %}
+<style>
+    .custom-row {
+        margin-right: 0;
+        margin-left: 0;
+    }
+</style>
+{% endblock css %}
 
 {% block content %}
-{% if messages %}
-{% for message in messages %}
-<div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" id="message">
-    {{ message }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>
-{% endfor %}
-{% endif %}
-
 <form action="" method="post" class="needs-validation" enctype="multipart/form-data" autocomplete="off" novalidate>
     {% csrf_token %}
-    <fieldset>
-        <legend>Formulário para criação do currículo:</legend>
-        {{ curriculo_form|crispy }}
-    </fieldset>
-    <hr>
-    <fieldset>
-        <legend>Formação acadêmica</legend>
-        {{ formacao_formset.management_form }}
-        <div id="formacao-forms">
-            {% for form_formacao in formacao_formset %}
-                <div class="formacao-formset-form">
-                    {{ form_formacao|crispy }}
+    <div class="card p-3">
+        <fieldset>
+            <legend>Informações Pessoais</legend>
+            <div class="row">
+                <div class="col-md-4 col-lg-6">
+                    {{ pessoa_form.nome|as_crispy_field }}
                 </div>
-            {% endfor %}
-        </div>
-        <!-- <button type="button" id="add-formacao" class="btn btn-primary w-100">Add Formação</button> -->
-    </fieldset>
-    <hr>
-    <fieldset>
-        <legend>Experiência profissional</legend>
-        {{ experiencia_formset.management_form }}
-        <div id="experiencia-forms">
-            {% for form_experiencia in experiencia_formset %}
-                <div class="experiencia-formset-form">
-                    {{ form_experiencia|crispy }}
+                <div class="col-md-4 col-lg-6">
+                    {{ pessoa_form.sobrenome|as_crispy_field }}
                 </div>
-            {% endfor %}
-        </div>
-        <!-- <button type="button" id="add-experiencia" class="btn btn-primary w-100">Add Experiência</button> -->
-    </fieldset>
-    <hr>
-    <fieldset>
-        <legend>Habilidades</legend>
-        {{ habilidade_formset.management_form }}
-        <div id="habilidade-forms">
-            {% for form_habilidade in habilidade_formset %}
-                <div class="habilidade-formset-form">
+                <div class="col-md-4 col-lg-3">
+                    {{ pessoa_form.data_de_nascimento|as_crispy_field }}
+                </div>
+                <div class="col-md-4 col-lg-3">
+                    {{ pessoa_form.sexo|as_crispy_field }}
+                </div>
+                <div class="col-md-4 col-lg-3">
+                    {{ pessoa_form.cpf|as_crispy_field }}
+                </div>
+                <div class="col-md-4 col-lg-3">
+                    {{ pessoa_form.rg|as_crispy_field }}
+                </div>
+                <div class="col-12">
+                    {{ pessoa_form.e_pcd|as_crispy_field }}
+                </div>
+                <div class="col-12">
+                    {{ pessoa_form.possui_cnh|as_crispy_field }}
+                </div>
+                <div class="col-12">
+                    {{ pessoa_form.categoria_da_cnh|as_crispy_field }}
+                </div>
+                <div class="col-12">
+                    {{ pessoa_form.e_primeiro_emprego|as_crispy_field }}
+                </div>
+                <div class="col-12">
+                    {{ pessoa_form.imagem|as_crispy_field }}
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    <div class="card p-3 mt-3">
+        <fieldset>
+            <legend>Informações de Contato</legend>
+            <div class="row">
+                <div class="col-md-6">
+                    {{ contato_form.telefone|as_crispy_field }}
+                </div>
+                <div class="col-md-6">
+                    {{ contato_form.email|as_crispy_field }}
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    <div class="card p-3 mt-3">
+        <fieldset>
+            <legend>Informações Residenciais</legend>
+            <div class="row">
+                <div class="col-sm-8 col-lg-5">
+                    {{ endereco_form.rua|as_crispy_field }}
+                </div>
+                <div class="col-sm-4 col-lg-2">
+                    {{ endereco_form.numero|as_crispy_field }}
+                </div>
+                <div class="col-md-8 col-lg-5">
+                    {{ endereco_form.complemento|as_crispy_field }}
+                </div>
+                <div class="col-sm-6 col-md-4 col-lg-3">
+                    {{ endereco_form.bairro|as_crispy_field }}
+                </div>
+                <div class="col-sm-6 col-md-4 col-lg-3">
+                    {{ endereco_form.cep|as_crispy_field }}
+                </div>
+                <div class="col-sm-6 col-md-4 col-lg-3">
+                    {{ endereco_form.cidade|as_crispy_field }}
+                </div>
+                <div class="col-sm-6 col-md-4 col-lg-3">
+                    {{ endereco_form.estado|as_crispy_field }}
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    <div class="card p-3 mt-3">
+        <fieldset>
+            <legend>Idiomas</legend>
+            {{ idioma_formset.management_form }}
+            <div class="card p-3">
+                {% for form_idioma in idioma_formset %}
+                <div class="idioma-formset">
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form_idioma.nome|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_idioma.nivel|as_crispy_field }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </fieldset>
+    </div>
+    <div class="card p-3 mt-3">
+        <fieldset>
+            <legend>Informações do Currículo</legend>
+            <div class="row">
+                <div class="col-12">
+                    {{ curriculo_form.resumo|as_crispy_field }}
+                </div>
+                <div class="col-12">
+                    {{ curriculo_form.subareas_de_interesse|as_crispy_field }}
+                </div>
+                <div class="col-12">
+                    {{ curriculo_form.informacoes_adicionais|as_crispy_field }}
+                </div>
+        </fieldset>
+    </div>
+    <div class="card p-3 mt-3">
+        <fieldset>
+            <legend>Formações Acadêmicas</legend>
+            {{ formacao_formset.management_form }}
+            <div class="card p-3">
+                {% for form_formacao in formacao_formset %}
+                <div class="formacao-formset">
+                    <div class="row">
+                        <div class="col-md-4">
+                            {{ form_formacao.instituicao|as_crispy_field }}
+                        </div>
+                        <div class="col-md-4">
+                            {{ form_formacao.grau|as_crispy_field }}
+                        </div>
+                        <div class="col-md-4">
+                            {{ form_formacao.curso|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_formacao.data_de_inicio|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_formacao.data_de_conclusao|as_crispy_field }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </fieldset>
+    </div>
+    <div class="card p-3 mt-3">
+        <fieldset>
+            <legend>Experiências Profissionais</legend>
+            {{ experiencia_formset.management_form }}
+            <div class="card p-3">
+                {% for form_experiencia in experiencia_formset %}
+                <div class="experiencia-formset">
+                    <div class="row">
+                        <div class="col-md-3">
+                            {{ form_experiencia.empresa|as_crispy_field }}
+                        </div>
+                        <div class="col-md-3">
+                            {{ form_experiencia.cargo|as_crispy_field }}
+                        </div>
+                        <div class="col-md-3">
+                            {{ form_experiencia.data_de_inicio|as_crispy_field }}
+                        </div>
+                        <div class="col-md-3">
+                            {{ form_experiencia.data_de_saida|as_crispy_field }}
+                        </div>
+                        <div class="col-12">
+                            {{ form_experiencia.descricao|as_crispy_field }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </fieldset>
+    </div>
+    <div class="card p-3 mt-3">
+        <fieldset>
+            <legend>Habilidades</legend>
+            {{ habilidade_formset.management_form }}
+            <div class="card p-3">
+                {% for form_habilidade in habilidade_formset %}
+                <div class="habilidade-formset">
                     {{ form_habilidade|crispy }}
                 </div>
-            {% endfor %}
-        </div>
-        <!-- <button type="button" id="add-habilidade" class="btn btn-primary w-100">Add Habilidade</button> -->
-    </fieldset>
+                {% endfor %}
+            </div>
+        </fieldset>
+    </div>
     <button type="submit" class="btn btn-dark w-100 mt-3">Salvar</button>
 </form>
-
 {% endblock content %}
 
 {% block javascript %}
 <script>
-    // function addForm(prefix) {
-    //     const totalForms = $(`#id_${prefix}-TOTAL_FORMS`);
-    //     const formContainer = $(`#${prefix}-forms`);
-    //     const formIndex = parseInt(totalForms.val(), 10);
-    //     const newForm = formContainer.find('.formset-form').first().clone(false);
-
-    //     // Update the name and id of each input field in the cloned form
-    //     newForm.find(':input').each(function() {
-    //         const name = $(this).attr('name').replace(/-\d+-/, `-${formIndex}-`);
-    //         const id = $(this).attr('id').replace(/-\d+-/, `-${formIndex}-`);
-    //         $(this).attr({ name, id }).val('');
-    //     });
-
-    //     const removeButton = $('<button type="button" class="btn btn-danger w-100 mb-3">Remove</button>');
-    //     removeButton.click(function() {
-    //         newForm.remove();
-    //         const totalFormsValue = parseInt(totalForms.val(), 10) - 1;
-    //         totalForms.val(totalFormsValue);
-
-    //         // Adjust the indices of all the forms after the removed one
-    //         formContainer.children('.formset-form').each(function(index) {
-    //             $(this).find(':input').each(function() {
-    //                 const name = $(this).attr('name').replace(/-\d+-/, `-${index}-`);
-    //                 const id = $(this).attr('id').replace(/-\d+-/, `-${index}-`);
-    //                 $(this).attr({ name, id });
-    //             });
-    //         });
-    //     });
-    //     newForm.append(removeButton);
-
-    //     formContainer.append(newForm);
-    //     totalForms.val(formIndex + 1);
-    // }
-
-    // $(document).ready(function() {
-    //     $('#id_pessoa').select2();
-
-    //     $('#add-formacao').click(function() {
-    //         addForm('formacao');
-    //     });
-    //     $('#add-experiencia').click(function() {
-    //         addForm('experiencia');
-    //     });
-    //     $('#add-habilidade').click(function() {
-    //         addForm('habilidade');
-    //     });
-    // });
-    $(document).ready(function() {
-        $('#id_pessoa').select2({
-            placeholder: 'Selecione uma pessoa',
-            allowClear: true
+    $(document).ready(function () {
+        // Inicializar o formset de idiomas
+        $('.idioma-formset').formset({
+            addText: 'Adicionar Idioma',
+            deleteText: 'Remover',
+            addCssClass: 'btn btn-primary w-100',
+            deleteCssClass: 'btn btn-danger mb-3',
+            prefix: '{{ idioma_formset.prefix }}',
         });
 
-        $('.formacao-formset-form').formset({
+        // Inicializar o formset de formação
+        $('.formacao-formset').formset({
             addText: 'Adicionar Formação',
-            deleteText: 'Remover Formação',
+            deleteText: 'Remover',
             addCssClass: 'btn btn-primary w-100',
-            deleteCssClass: 'btn btn-danger w-100 mb-3',
-            prefix: '{{ formacao_formset.prefix }}'
+            deleteCssClass: 'btn btn-danger mb-3',
+            prefix: '{{ formacao_formset.prefix }}',
         });
 
-        $('.experiencia-formset-form').formset({
+        // Inicializar o formset de experiência
+        $('.experiencia-formset').formset({
             addText: 'Adicionar Experiência',
-            deleteText: 'Remover Experiência',
+            deleteText: 'Remover',
             addCssClass: 'btn btn-primary w-100',
-            deleteCssClass: 'btn btn-danger w-100 mb-3',
-            prefix: '{{ experiencia_formset.prefix }}'
+            deleteCssClass: 'btn btn-danger mb-3',
+            prefix: '{{ experiencia_formset.prefix }}',
         });
 
-        $('.habilidade-formset-form').formset({
+        // Inicializar o formset de habilidade
+        $('.habilidade-formset').formset({
             addText: 'Adicionar Habilidade',
-            deleteText: 'Remover Habilidade',
+            deleteText: 'Remover',
             addCssClass: 'btn btn-primary w-100',
-            deleteCssClass: 'btn btn-danger w-100 mb-3',
-            prefix: '{{ habilidade_formset.prefix }}'
+            deleteCssClass: 'btn btn-danger mb-3',
+            prefix: '{{ habilidade_formset.prefix }}',
+        });
+
+        // Lógica para mostrar/ocultar campo Categoria CNH
+        $('#id_possui_cnh').change(function () {
+            if ($(this).is(':checked')) {
+                $('#div_id_categoria_da_cnh').show();
+            } else {
+                $('#div_id_categoria_da_cnh').hide();
+            }
+        }).change(); // Chama o evento change inicialmente para lidar com o estado inicial
+
+        // Inicialmente esconder o campo se o checkbox não estiver marcado
+        if (!$('#id_possui_cnh').is(':checked')) {
+            $('#div_id_categoria').hide();
+        }
+
+        // função para limpar o campo de CEP
+        function limparCamposEndereco() {
+            $('#id_rua').val('');
+            $('#id_numero').val('');
+            $('#id_bairro').val('');
+            $('#id_complemento').val('');
+            $('#id_cidade').val('');
+            $('#id_estado').val('');
+
+        }
+
+        $('#id_cep').on('input', function () { // Evento a cada mudança no campo de CEP
+            var cep = $(this).val().replace(/\D/g, ''); // Remove todos os não dígitos do valor do campo CEP
+
+            if (cep.length === 8) { // Verifica se o CEP possui 8 dígitos
+                $.getJSON(`https://viacep.com.br/ws/${cep}/json/`, function (data) { // Requisição AJAX para a API ViaCEP
+                    if (!data.erro) { // Se não houver erro na resposta da API
+                        $('#id_cidade').val(data.localidade); // Preenche o campo de cidade
+                        $('#id_estado').val(data.uf); // Preenche o campo de estado
+                        $('#id_bairro').val(data.bairro); // Preenche o campo de bairro
+                        $('#id_endereco').val(data.logradouro); // Preenche o campo de endereço
+                    } else {
+                        alert('CEP não encontrado.');
+                    }
+                }).fail(function () {
+                    console.log('Erro ao buscar o CEP.');
+                });
+            }
+        });
+
+        // Inicializar o campo de subáreas de interesse com o Select2
+        $('#id_subareas_de_interesse').select2({
+            placeholder: 'Selecione as subáreas de interesse',
+            allowClear: true,
         });
     });
 </script>

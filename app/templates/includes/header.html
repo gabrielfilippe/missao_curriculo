@@ -16,26 +16,23 @@
                 </a>
                 <ul class="navbar-nav col-md-6 justify-content-md-center">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/curriculo/' %}active{% endif %} link" href="{% url 'index' %}">Home</a>
+                        <a class="nav-link {% if request.path == '/curriculo/home/' %}active{% endif %} link" href="{% url 'curriculo:home' %}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/curriculo/pessoas/' %}active{% endif %} link" href="{% url 'pessoas' %}">Pessoas</a>
+                        <a class="nav-link {% if request.path == '/curriculo/criar/' %}active{% endif %} link" href="{% url 'curriculo:criar_curriculo' %}">Criar Currículo</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/curriculo/criar_curriculo/' %}active{% endif %} link" href="{% url 'criar_curriculo' %}">Criar Currículo</a>
+                        <a class="nav-link {% if request.path == '/curriculo/curriculos/' %}active{% endif %} link" href="{% url 'curriculo:curriculos' %}">Currículos</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/curriculo/curriculos/' %}active{% endif %} link" href="{% url 'curriculos' %}">Currículos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/curriculo/filtrar_curriculo/' %}active{% endif %} link" href="{% url 'filtrar_curriculo' %}">Filtrar Currículo</a>
+                        <a class="nav-link {% if request.path == '/curriculo/pessoas/' %}active{% endif %} link" href="{% url 'curriculo:pessoas' %}">Pessoas</a>
                     </li>
                 </ul>
                 <div class="d-md-flex col-md-3 justify-content-md-end">
                     {% if user.is_authenticated %}
-                    <button class="btn btn-outline-light btn-logout">Sair</button>
+                    <a class="btn btn-outline-danger btn-logout" href="{% url 'curriculo:logout' %}">Sair</a>
                     {% else %}
-                    <a class="btn btn-outline-light btn-login" href="#">Entrar</a>
+                    <a class="btn btn-outline-light btn-login" href="{% url 'curriculo:login' %}">Entrar</a>
                     {% endif %}
                 </div>
             </div>

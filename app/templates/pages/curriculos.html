@@ -1,29 +1,120 @@
 {% extends 'base/base.html' %}
 
-{% block title %}Curriculos{% endblock %}
+{% block title %}Currículos{% endblock %}
 
 {% block content %}
-
-{% if messages %}
-{% for message in messages %}
-{% if message.tags == 'success' %}
-<div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" id="message">
-    {{ message }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<!-- Filtro e Pesquisa -->
+<div class="accordion accordion-flush border" id="accordionExample">
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
+                aria-expanded="false" aria-controls="collapseOne">
+                Filtros e Pesquisa
+            </button>
+        </h2>
+        <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+            <div class="accordion-body overflow-hidden">
+                <form action="" method="get" id="filtro-form">
+                    <div class="row">
+                        <div class="form-group col-md-6 mb-3">
+                            <label for="nome_completo">Nome completo</label>
+                            <input type="text" class="form-control" id="nome_completo" name="nome_completo"
+                                placeholder="Digite nome e/ou sobrenome">
+                        </div>
+                        <div class="form-group col-md-6 mb-3">
+                            <label for="email">E-mail</label>
+                            <input type="email" class="form-control" id="email" name="email"
+                                placeholder="Digite o e-mail">
+                        </div>
+                        <div class="form-group col-12 col-sm-6 col-md-4 mb-3">
+                            <label for="data_de_nascimento">Data de nascimento</label>
+                            <input type="date" class="form-control" id="data_de_nascimento" name="data_de_nascimento">
+                        </div>
+                        <div class="form-group col-12 col-sm-6 col-md-4 mb-3">
+                            <label for="sexo">Sexo</label>
+                            <select class="form-select" id="sexo" name="sexo">
+                                <option value="">Selecione uma opção</option>
+                                {% for key, value in pessoa_sexo_choices %}
+                                <option value="{{ key }}">{{ value }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group col-12 col-sm-6 col-md-4 mb-3">
+                            <label for="categoria">Categoria CNH</label>
+                            <select class="form-select" id="categoria" name="categoria_da_cnh">
+                                <option value="">Selecione uma opção</option>
+                                {% for key, value in pessoa_categoria_choices %}
+                                <option value="{{ key }}">{{ value }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group col-12 col-sm-6 col-md-4 mb-3">
+                            <label for="area_de_interesse">Área de Interesse</label>
+                            <select class="form-select" id="area_de_interesse" name="area_de_interesse">
+                                <option value="">Selecione uma opção</option>
+                                {% for area in areas_de_interesse %}
+                                <option value="{{ area.id }}">{{ area.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group col-12 col-sm-6 col-md-4 mb-3">
+                            <label for="subarea_de_interesse">Subárea de Interesse</label>
+                            <select class="form-select" id="subarea_de_interesse" name="subarea_de_interesse">
+                                <option value="">Selecione uma opção</option>
+                                {% for subarea in subareas_de_interesse %}
+                                <option value="{{ subarea.id }}">{{ subarea.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group col-12 col-sm-6 col-md-4 mb-3">
+                            <label for="data_criacao">Data de Criação do currículo</label>
+                            <input type="date" class="form-control" id="data_criacao" name="data_criacao">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="e_pcd" name="e_pcd">
+                                <label class="form-check-label" for="e_pcd">
+                                    PCD
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="possui_cnh" name="possui_cnh">
+                                <label class="form-check-label" for="possui_cnh">
+                                    Possui CNH
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="e_primeiro_emprego"
+                                    name="e_primeiro_emprego">
+                                <label class="form-check-label" for="e_primeiro_emprego">
+                                    Primeiro Emprego
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <button type="button" class="btn btn-secondary btn-sm float-end" id="reset-filters">
+                    <i class="bi bi-arrow-counterclockwise"></i> Resetar Filtros
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
-{% endif %}
-{% endfor %}
-{% endif %}
 
-<!-- Tabela -->
- <div class="card mt-3">
+<!-- Table -->
+<div class="card mt-3">
     <div class="card-header">
-        Curriculos
+        Currículos
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-striped table-bordered table-responsive mb-0 text-center align-middle">
-                <caption>Lista de curriculos</caption>
+            <table class="table table-striped table-bordered mb-0 text-center align-middle nowrap"
+                id="curriculos-table">
+                <caption class="pb-0">Lista de currículos</caption>
                 <thead>
                     <tr class="align-middle">
                         <th>Pessoa</th>
@@ -32,59 +123,69 @@
                         <th>Habilidades</th>
                         <th>Criado em</th>
                         <th>Atualizado em</th>
-                        <th>Ações</th>
+                        <th>PDF</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for curriculo in curriculos %}
-                    <tr>
-                        <td>{{ curriculo.pessoa }}</td>
-                        <td>
-                            {% if curriculo.formacoes %}
-                            {% for formacao in curriculo.formacoes.all %}
-                            <span>{{ formacao.curso }}</span><br>
-                            {% endfor %}
-                            {% else %}
-                            -
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if curriculo.experiencias %}
-                            {% for experiencia in curriculo.experiencias.all %}
-                            <span>{{ experiencia.cargo }}</span><br>
-                            {% endfor %}
-                            {% else %}
-                            -
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if curriculo.habilidades %}
-                            {% for habilidade in curriculo.habilidades.all %}
-                            <span>{{ habilidade.nome }}</span><br>
-                            {% endfor %}
-                            {% else %}
-                            -
-                            {% endif %}
-                        </td>
-                        <td>{{ curriculo.created_at|date:"d/m/Y H:i:s" }}</td>
-                        <td>{{ curriculo.updated_at|date:"d/m/Y H:i:s" }}</td>
-                        <td>
-                            <a href="{% url 'editar_curriculo' curriculo.id %}" class="btn btn-primary btn-sm">
-                                <i class="fas fa-edit me-1"></i>
-                                Editar
-                            </a>
-                            <a href="{% url 'excluir_curriculo' curriculo.id %}" class="btn btn-danger btn-sm">
-                                <i class="fas fa-trash-alt me-1"></i>
-                                Excluir
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
+                    <!-- Aqui é onde vamos adicionar a linha de fallback -->
                 </tbody>
             </table>
         </div>
     </div>
- </div>
+</div>
 
 {% endblock content %}
 
+{% block javascript %}
+<script>
+    const curriculoPdfUrl = '{% url "curriculo:curriculo_pdf" 1 %}'; // URL dummy for pattern
+    const curriculoPdfBaseUrl = curriculoPdfUrl.slice(0, -2); // Remove '1/' at the end
+
+    $(document).ready(function () {
+        function fetchCurriculos() {
+            $.ajax({
+                url: '{% url "curriculo:filtrar_curriculos" %}',
+                data: $('#filtro-form').serialize(),
+                dataType: 'json',
+                success: function (data) {
+                    var tableBody = $('#curriculos-table tbody');
+                    tableBody.empty();
+
+                    if (data.curriculos.length === 0) {
+                        // Se não houver currículos, exibe uma mensagem ou linha especial
+                        var emptyRow = '<tr><td colspan="7" class="text-center">Nenhum currículo encontrado com os filtros selecionados.</td></tr>';
+                        tableBody.append(emptyRow);
+                    } else {
+                        data.curriculos.forEach(function(curriculo) {
+                            var row = '<tr>';
+                            row += '<td>' + curriculo.pessoa_nome + ' ' + curriculo.pessoa_sobrenome + '</td>';
+                            row += '<td>' + (curriculo.formacoes.length ? curriculo.formacoes.join('<br>') : '-') + '</td>';
+                            row += '<td>' + (curriculo.experiencias.length ? curriculo.experiencias.join('<br>') : '-') + '</td>';
+                            row += '<td>' + (curriculo.habilidades.length ? curriculo.habilidades.join('<br>') : '-') + '</td>';
+                            row += '<td>' + curriculo.criado_em + '</td>';
+                            row += '<td>' + curriculo.atualizado_em + '</td>';
+                            row += '<td><a href="' + curriculoPdfBaseUrl + curriculo.id + '/" class="btn btn-primary btn-sm" target="_blank">Gerar PDF</a></td>';
+                            row += '</tr>';
+                            tableBody.append(row);
+                        });
+                    }
+                }
+            });
+        }
+
+        // Fetch curriculos on input change
+        $('#filtro-form').on('input change', function () {
+            fetchCurriculos();
+        });
+
+        // Reset filters
+        $('#reset-filters').click(function () {
+            $('#filtro-form').trigger('reset');
+            fetchCurriculos();
+        });
+
+        // Fetch curriculos on page load
+        fetchCurriculos();
+    });
+</script>
+{% endblock javascript %}
