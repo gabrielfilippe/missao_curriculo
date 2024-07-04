@@ -1,4 +1,4 @@
-rom app.models import *
+from app.models import *
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 

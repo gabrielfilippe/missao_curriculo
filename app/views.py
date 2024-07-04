@@ -15,8 +15,16 @@ from django.urls import reverse_lazy
 from django.utils.timezone import localtime
 from io import BytesIO
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle
+from reportlab.lib.units import cm
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle, ListStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle, Frame, ListFlowable, ListItem
+from reportlab.lib.units import inch
+from reportlab.lib.utils import ImageReader
+from reportlab.pdfgen import canvas
+from reportlab.lib.enums import TA_LEFT
+
+
+
 
 # Create your views here.
 def login_view(request):
@@ -191,6 +199,7 @@ def criar_curriculo(request):
             }
 
             return render(request, 'pages/criar_curriculo.html', context)
+        
 
 @login_required(login_url=reverse_lazy('curriculo:login'))
 def filtrar_curriculos(request):
@@ -264,108 +273,202 @@ def filtrar_curriculos(request):
 
     return JsonResponse(data)
 
+
+#View que gera o PDF, tudo relacionado ao PDF, é aqui.
 @login_required(login_url=reverse_lazy('admin:login'))
 def curriculo_pdf_view(request, pk):
     curriculo = get_object_or_404(Curriculo, pk=pk)
+    
 
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'inline; filename="curriculo_{curriculo.pessoa.nome}.pdf"'
 
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4)
+    p = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+
+    pessoa = curriculo.pessoa
+    contato = pessoa.contato
+    endereco = pessoa.endereco
+
+    # Coordenadas de posição inicial
+    x_offset = 2 * cm
+    y_offset = height - 2 * cm
+
+    # Adicionar a foto no lado superior esquerdo
+    if pessoa.imagem:
+        image_path = os.path.join(settings.MEDIA_ROOT, pessoa.imagem.name)
+        p.drawImage(ImageReader(image_path), x_offset, y_offset - 4 * cm, width=4.3 * cm, height=4.3 * cm)
+        x_offset += 4.8 * cm  # Ajustar o offset para o texto ao lado da imagem
+
+    # Ajustar o tamanho e estilo do nome
+    p.setFont("Helvetica-Bold", 16)
+
+    # Ajustar posição do nome
+    p.drawString(x_offset, y_offset - 0.2 * cm, f"{pessoa.nome} {pessoa.sobrenome}")
+
+    #espaço entre o nome e as info
+
+    y_offset -= 0 * cm
+
+    # Ajustar o tamanho e estilo das informações
+    p.setFont("Helvetica", 11.5)
+
+    # Informações ao lado da foto
+    p.drawString(x_offset, y_offset - 1.5 * cm, f"Data de Nascimento: {pessoa.data_de_nascimento.strftime('%d/%m/%Y')}")
+    p.drawString(x_offset, y_offset - 2 * cm, f"Sexo: {pessoa.sexo}")
+    p.drawString(x_offset, y_offset - 2.5 * cm, f"CPF: {pessoa.cpf} | RG: {pessoa.rg}")
+
+    # Espaço após as informações ao lado da foto
+    y_offset -= 2.5 * cm
+
+    # Endereço
+    p.drawString(x_offset, y_offset - 0.5 * cm, f"Endereço: {endereco.rua}, {endereco.numero} - {endereco.bairro}, {endereco.cidade} - {endereco.estado} - {endereco.cep}")
+    # Espaço após o endereço
+    y_offset -= 0.5 * cm
+
+    # Contato
+    p.drawString(x_offset, y_offset - 0.5 * cm, f"Telefone: {contato.telefone}")
+    p.drawString(x_offset, y_offset - 1 * cm, f"Email: {contato.email}")
+    # Espaço após o contato
+    y_offset -= 2.0 * cm
+
+    # Adicionar conteúdo adicional (resumo, formação acadêmica, experiência profissional, habilidades, idiomas, áreas e subáreas de interesse)
+    styles = getSampleStyleSheet()
+    elements = []
+
 
     styles = getSampleStyleSheet()
     elements = []
 
-    p = curriculo.pessoa
-
-    # Add image if exists
-    if p.imagem:
-        image_path = os.path.join(settings.MEDIA_ROOT, p.imagem.name)
-        img = Image(image_path)
-        img.drawHeight = 100
-        img.drawWidth = 100
-        elements.append(img)
-        elements.append(Spacer(1, 12))
-
-    # Heading
-    heading = Paragraph(f"<b>{p.nome} {p.sobrenome}</b>", styles['Title'])
-    elements.append(heading)
-
-    contact_info = Paragraph(f"Data de nascimento: {p.data_de_nascimento.strftime('%d/%m/%Y')}, {p.sexo}", styles['Normal'])
-    elements.append(contact_info)
-    contact_info = Paragraph(f"Endereço: {p.endereco.endereco}, {p.endereco.numero} - {p.endereco.bairro}, {p.endereco.cidade} - {p.endereco.estado}", styles['Normal'])
-    elements.append(contact_info)
-    contact_info = Paragraph(f"Telefone: {p.contato.telefone} Email: {p.contato.email}", styles['Normal'])
-    elements.append(contact_info)
-    elements.append(Spacer(1, 12))
-
-    # Resumo
+    # Adicionando resumo
     if curriculo.resumo:
-        elements.append(Paragraph("Resumo", styles['Heading2']))
-        elements.append(Paragraph(curriculo.resumo, styles['Normal']))
-        elements.append(Spacer(1, 12))
+        p.setFont("Helvetica-Bold", 12)
+        p.drawString(2 * cm, y_offset, "RESUMO")
+        # espaço entre o tópico e a linha separadora
+        y_offset -= 0.2 * cm
 
-    # Formação Acadêmica
-    elements.append(Paragraph("Formação Acadêmica", styles['Heading2']))
-    for formacao in curriculo.formacaoacademica_set.all():
-        data_de_conclusao = formacao.data_de_conclusao.strftime('%m/%Y') if formacao.data_de_conclusao else 'Em andamento'
-        formacao_text = f"{formacao.curso} - {formacao.instituicao.nome} - {data_de_conclusao}"
-        elements.append(Paragraph(formacao_text, styles['Normal']))
-        elements.append(Spacer(1, 6))
+        # Linha separadora
+        p.line(2* cm, y_offset, width - 2 * cm, y_offset)
+        y_offset -= 0.2 * cm
+
+        # Adicionar o texto do resumo usando Paragraph e Frame
+        p.setFont("Helvetica", 10)
+        frame = Frame(1.8 * cm, y_offset - 7.3 * cm, width - 3 * cm, 7.5 * cm, showBoundary=0)
+        resumo_paragraph = Paragraph(curriculo.resumo, styles['Normal'])
+        frame.addFromList([resumo_paragraph], p)
+
+        # Ajustar o y_offset após adicionar o resumo
+        y_offset -= 4 * cm
+
+    # y_offset -= 1.5 * cm
+
+  # Formação Acadêmica
+    if curriculo.formacaoacademica_set.exists():
+        p.setFont("Helvetica-Bold", 12)
+        p.drawString(2 * cm, y_offset, "Formação Acadêmica")
+        # espaço entre o tópico e a linha separadora
+        y_offset -= 0.2 * cm
+        # Linha separadora
+        p.line(2 * cm, y_offset, width - 2 * cm, y_offset)
+        y_offset -= 0.5 * cm
+
+        # Adicionar o texto das formações acadêmicas em forma de tópicos
+        p.setFont("Helvetica", 11)
+        for formacao in curriculo.formacaoacademica_set.all():
+            data_de_conclusao = formacao.data_de_conclusao.strftime('%m/%Y') if formacao.data_de_conclusao else 'Em andamento'
+            formacao_text = f"\u2022 {formacao.curso} - {formacao.instituicao.nome} - {data_de_conclusao}"
+            p.drawString(2.0 * cm, y_offset, formacao_text)
+            y_offset -= 0.5 * cm
+
+        # Ajustar o y_offset após adicionar as formações acadêmicas
+        y_offset -= 1.0 * cm
 
     # Experiência Profissional
-    elements.append(Paragraph("Experiência Profissional", styles['Heading2']))
-    for experiencia in curriculo.experienciaprofissional_set.all():
-        data_de_saida = experiencia.data_de_saida.strftime('%m/%Y') if experiencia.data_de_saida else 'Presente'
-        exp_text = f"{experiencia.cargo} - {experiencia.empresa.nome} - {experiencia.data_de_inicio.strftime('%m/%Y')} - {data_de_saida}"
-        elements.append(Paragraph(exp_text, styles['Normal']))
-        if experiencia.descricao:
-            elements.append(Paragraph(experiencia.descricao, styles['Normal']))
-        elements.append(Spacer(1, 6))
+    if curriculo.experienciaprofissional_set.exists():
+        p.setFont("Helvetica-Bold", 12)
+        p.drawString(2 * cm, y_offset, "EXPERIÊNCIA PROFISSIONAL")
+        # espaço entre o tópico e a linha separadora
+        y_offset -= 0.2 * cm
 
-    # Habilidades
+        # Linha separadora
+        p.line(2 * cm, y_offset, width - 2 * cm, y_offset)
+
+        y_offset -= 0.5 * cm
+        p.setFont("Helvetica", 11)
+        for experiencia in curriculo.experienciaprofissional_set.all():
+            data_de_saida = experiencia.data_de_saida.strftime('%m/%Y') if experiencia.data_de_saida else 'Presente'
+            exp_text = f"{experiencia.cargo} - {experiencia.empresa.nome} - {experiencia.data_de_inicio.strftime('%m/%Y')} - {data_de_saida}"
+            p.drawString(2 * cm, y_offset, exp_text)
+            if experiencia.descricao:
+                y_offset -= 0.5 * cm
+                p.drawString(2 * cm, y_offset, experiencia.descricao)
+            y_offset -= 1 * cm
+
+        y_offset -= 1.5 * cm
+
+     # Habilidades
     if curriculo.habilidade_set.exists():
-        elements.append(Paragraph("Habilidades", styles['Heading2']))
+        p.setFont("Helvetica-Bold", 12)
+        p.drawString(2 * cm, y_offset, "HABILIDADES")
+        # espaço entre o tópico e a linha separadora
+        y_offset -= 0.2 * cm
+
+        # Linha separadora
+        p.line(2 * cm, y_offset, width - 2 * cm, y_offset)
+
+        y_offset -= 0.5 * cm
+
+        # Adicionar o texto das habilidades em forma de tópicos
+        p.setFont("Helvetica", 11)
         for habilidade in curriculo.habilidade_set.all():
-            elements.append(Paragraph(habilidade.nome, styles['Normal']))
-            elements.append(Spacer(1, 6))
+            habilidade_text = f"\u2022 {habilidade.nome}"
+            p.drawString(2.0 * cm, y_offset, habilidade_text)
+            y_offset -= 0.5 * cm
+
+        # Ajustar o y_offset após adicionar as habilidades
+        y_offset -= 1.5 * cm
+
+    # y_offset -= 1.5 * cm
 
     # Idiomas
-    if curriculo.pessoa.idioma_set.exists():
-        elements.append(Paragraph("Idiomas", styles['Heading2']))
-        for idioma in curriculo.pessoa.idioma_set.all():
+    if pessoa.idioma_set.exists():
+        p.setFont("Helvetica-Bold", 12)
+        p.drawString(2 * cm, y_offset, "IDIOMAS")
+        # espaço entre o tópico e a linha separadora
+        y_offset -= 0.2 * cm
+
+        # Linha separadora
+        p.line(2 * cm, y_offset, width - 2 * cm, y_offset)
+        y_offset -= 0.5 * cm
+        p.setFont("Helvetica", 11)
+        for idioma in pessoa.idioma_set.all():
             idioma_text = f"{idioma.nome} - {idioma.nivel}"
-            elements.append(Paragraph(idioma_text, styles['Normal']))
-            elements.append(Spacer(1, 6))
+            p.drawString(2 * cm, y_offset, idioma_text)
+            y_offset -= 0.5 * cm
+
+    y_offset -= 1.5 * cm
 
     # Áreas e Subáreas de Interesse
     if curriculo.subareas_de_interesse.exists():
-        elements.append(Paragraph("Áreas de Interesse", styles['Heading2']))
-        
-        # Usar defaultdict para agrupar subáreas por áreas de interesse
-        area_subareas = defaultdict(list)
-        
+        p.setFont("Helvetica-Bold", 12)
+        p.drawString(2 * cm, y_offset, "ÁREAS E SUBÁREAS DE INTERESSE")
+        # espaço entre o tópico e a linha separadora
+        y_offset -= 0.2 * cm
+
+        # Linha separadora
+        p.line(2 * cm, y_offset, width - 2 * cm, y_offset)
+        y_offset -= 0.5 * cm
+        p.setFont("Helvetica", 11)
         for subarea in curriculo.subareas_de_interesse.all():
-            area_subareas[subarea.area_de_interesse.nome].append(subarea.nome)
-        
-        # Adicionar ao PDF
-        for area, subareas in area_subareas.items():
-            elements.append(Paragraph(f"Área: {area}", styles['Normal']))
-            for subarea in subareas:
-                elements.append(Paragraph(f"Subárea: {subarea}", styles['Normal']))
-            elements.append(Spacer(1, 6))
+            subarea_text = f"{subarea.nome} ({subarea.area_de_interesse.nome})"
+            p.drawString(2 * cm, y_offset, subarea_text)
+            y_offset -= 0.5 * cm
 
-    # Informações Adicionais
-    if curriculo.informacoes_adicionais:
-        elements.append(Paragraph("Informações Adicionais", styles['Heading2']))
-        elements.append(Paragraph(curriculo.informacoes_adicionais, styles['Normal']))
-        elements.append(Spacer(1, 12))
-
-    doc.build(elements)
-
-    pdf = buffer.getvalue()
+    p.showPage()
+    p.save()
+    
+    buffer.seek(0)
+    response.write(buffer.getvalue())
     buffer.close()
-
-    response.write(pdf)
     return response

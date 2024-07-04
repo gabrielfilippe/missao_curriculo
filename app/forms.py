@@ -1,4 +1,4 @@
-rom app.models import *
+from app.models import *
 from django import forms
 from django.forms import inlineformset_factory
 from django.forms.models import BaseInlineFormSet
