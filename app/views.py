@@ -17,7 +17,7 @@ from io import BytesIO
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle, ListStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle, Frame, ListFlowable, ListItem
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle, Frame, ListFlowable, ListItem, FrameBreak
 from reportlab.lib.units import inch
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
@@ -285,6 +285,7 @@ def curriculo_pdf_view(request, pk):
 
     buffer = BytesIO()
     p = canvas.Canvas(buffer, pagesize=A4)
+    doc = SimpleDocTemplate(buffer, pagesize=A4)
     width, height = A4
 
     pessoa = curriculo.pessoa
@@ -298,21 +299,21 @@ def curriculo_pdf_view(request, pk):
     # Adicionar a foto no lado superior esquerdo
     if pessoa.imagem:
         image_path = os.path.join(settings.MEDIA_ROOT, pessoa.imagem.name)
-        p.drawImage(ImageReader(image_path), x_offset, y_offset - 4 * cm, width=4.3 * cm, height=4.3 * cm)
-        x_offset += 4.8 * cm  # Ajustar o offset para o texto ao lado da imagem
+        p.drawImage(ImageReader(image_path), x_offset, y_offset - 4 * cm, width=4 * cm, height=4 * cm)
+        x_offset += 4.6 * cm  # Ajustar o offset para o texto ao lado da imagem
 
     # Ajustar o tamanho e estilo do nome
-    p.setFont("Helvetica-Bold", 16)
+    p.setFont("Helvetica-Bold", 17)
 
     # Ajustar posição do nome
-    p.drawString(x_offset, y_offset - 0.2 * cm, f"{pessoa.nome} {pessoa.sobrenome}")
+    p.drawString(x_offset, y_offset - 0.6 * cm, f"{pessoa.nome} {pessoa.sobrenome}")
 
     #espaço entre o nome e as info
 
     y_offset -= 0 * cm
 
     # Ajustar o tamanho e estilo das informações
-    p.setFont("Helvetica", 11.5)
+    p.setFont("Helvetica", 11)
 
     # Informações ao lado da foto
     p.drawString(x_offset, y_offset - 1.5 * cm, f"Data de Nascimento: {pessoa.data_de_nascimento.strftime('%d/%m/%Y')}")
@@ -342,36 +343,31 @@ def curriculo_pdf_view(request, pk):
     elements = []
 
     # Adicionando resumo
+    styles = getSampleStyleSheet()
     if curriculo.resumo:
         p.setFont("Helvetica-Bold", 12)
         p.drawString(2 * cm, y_offset, "RESUMO")
-        # espaço entre o tópico e a linha separadora
+        #Distancia entre o topico e a linha separadora
         y_offset -= 0.2 * cm
+        p.line(2 * cm, y_offset, width - 2 * cm, y_offset)
+        y_offset -= 0.3 * cm
 
-        # Linha separadora
-        p.line(2* cm, y_offset, width - 2 * cm, y_offset)
-        y_offset -= 0.2 * cm
-
-        # Adicionar o texto do resumo usando Paragraph e Frame
-        p.setFont("Helvetica", 10)
-        frame = Frame(1.8 * cm, y_offset - 7.3 * cm, width - 3 * cm, 7.5 * cm, showBoundary=0)
+        # Adiciona o resumo como um parágrafo com quebra de linha automática
         resumo_paragraph = Paragraph(curriculo.resumo, styles['Normal'])
-        frame.addFromList([resumo_paragraph], p)
+        resumo_width, resumo_height = resumo_paragraph.wrap(width - 4 * cm, height - y_offset)
+        resumo_paragraph.drawOn(p, 2 * cm, y_offset - resumo_height)
+        y_offset -= resumo_height + 0.8 * cm  # Atualiza a posição y_offset com base na altura do resumo
 
-        # Ajustar o y_offset após adicionar o resumo
-        y_offset -= 4 * cm
-
-    # y_offset -= 1.5 * cm
 
   # Formação Acadêmica
     if curriculo.formacaoacademica_set.exists():
         p.setFont("Helvetica-Bold", 12)
-        p.drawString(2 * cm, y_offset, "Formação Acadêmica")
+        p.drawString(2 * cm, y_offset, "FORMAÇÃO ACADÊMICA")
         # espaço entre o tópico e a linha separadora
         y_offset -= 0.2 * cm
         # Linha separadora
         p.line(2 * cm, y_offset, width - 2 * cm, y_offset)
-        y_offset -= 0.5 * cm
+        y_offset -= 0.8 * cm
 
         # Adicionar o texto das formações acadêmicas em forma de tópicos
         p.setFont("Helvetica", 11)
@@ -382,7 +378,7 @@ def curriculo_pdf_view(request, pk):
             y_offset -= 0.5 * cm
 
         # Ajustar o y_offset após adicionar as formações acadêmicas
-        y_offset -= 1.0 * cm
+        y_offset -= 0.5 * cm
 
     # Experiência Profissional
     if curriculo.experienciaprofissional_set.exists():
@@ -390,11 +386,10 @@ def curriculo_pdf_view(request, pk):
         p.drawString(2 * cm, y_offset, "EXPERIÊNCIA PROFISSIONAL")
         # espaço entre o tópico e a linha separadora
         y_offset -= 0.2 * cm
-
         # Linha separadora
         p.line(2 * cm, y_offset, width - 2 * cm, y_offset)
+        y_offset -= 0.8 * cm
 
-        y_offset -= 0.5 * cm
         p.setFont("Helvetica", 11)
         for experiencia in curriculo.experienciaprofissional_set.all():
             data_de_saida = experiencia.data_de_saida.strftime('%m/%Y') if experiencia.data_de_saida else 'Presente'
@@ -405,7 +400,7 @@ def curriculo_pdf_view(request, pk):
                 p.drawString(2 * cm, y_offset, experiencia.descricao)
             y_offset -= 1 * cm
 
-        y_offset -= 1.5 * cm
+        y_offset -= 0.3 * cm
 
      # Habilidades
     if curriculo.habilidade_set.exists():
@@ -416,8 +411,7 @@ def curriculo_pdf_view(request, pk):
 
         # Linha separadora
         p.line(2 * cm, y_offset, width - 2 * cm, y_offset)
-
-        y_offset -= 0.5 * cm
+        y_offset -= 0.8 * cm
 
         # Adicionar o texto das habilidades em forma de tópicos
         p.setFont("Helvetica", 11)
@@ -427,7 +421,7 @@ def curriculo_pdf_view(request, pk):
             y_offset -= 0.5 * cm
 
         # Ajustar o y_offset após adicionar as habilidades
-        y_offset -= 1.5 * cm
+        y_offset -= 0.5 * cm
 
     # y_offset -= 1.5 * cm
 
@@ -435,39 +429,33 @@ def curriculo_pdf_view(request, pk):
     if pessoa.idioma_set.exists():
         p.setFont("Helvetica-Bold", 12)
         p.drawString(2 * cm, y_offset, "IDIOMAS")
-        # espaço entre o tópico e a linha separadora
         y_offset -= 0.2 * cm
-
-        # Linha separadora
         p.line(2 * cm, y_offset, width - 2 * cm, y_offset)
-        y_offset -= 0.5 * cm
+        y_offset -= 0.8 * cm
         p.setFont("Helvetica", 11)
         for idioma in pessoa.idioma_set.all():
-            idioma_text = f"{idioma.nome} - {idioma.nivel}"
+            idioma_text = f"\u2022 {idioma.nome} - {idioma.nivel}"
             p.drawString(2 * cm, y_offset, idioma_text)
             y_offset -= 0.5 * cm
 
-    y_offset -= 1.5 * cm
+    y_offset -= 0.5 * cm
 
     # Áreas e Subáreas de Interesse
     if curriculo.subareas_de_interesse.exists():
         p.setFont("Helvetica-Bold", 12)
         p.drawString(2 * cm, y_offset, "ÁREAS E SUBÁREAS DE INTERESSE")
-        # espaço entre o tópico e a linha separadora
         y_offset -= 0.2 * cm
-
-        # Linha separadora
         p.line(2 * cm, y_offset, width - 2 * cm, y_offset)
-        y_offset -= 0.5 * cm
+        y_offset -= 0.8 * cm
         p.setFont("Helvetica", 11)
         for subarea in curriculo.subareas_de_interesse.all():
-            subarea_text = f"{subarea.nome} ({subarea.area_de_interesse.nome})"
+            subarea_text = f"\u2022 {subarea.nome} ({subarea.area_de_interesse.nome})"
             p.drawString(2 * cm, y_offset, subarea_text)
             y_offset -= 0.5 * cm
 
     p.showPage()
     p.save()
-    
+
     buffer.seek(0)
     response.write(buffer.getvalue())
     buffer.close()
