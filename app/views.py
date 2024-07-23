@@ -296,11 +296,21 @@ def curriculo_pdf_view(request, pk):
     x_offset = 2 * cm
     y_offset = height - 2 * cm
 
-    # Adicionar a foto no lado superior esquerdo
+   # Adicionar a foto no lado superior esquerdo
     if pessoa.imagem:
         image_path = os.path.join(settings.MEDIA_ROOT, pessoa.imagem.name)
-        p.drawImage(ImageReader(image_path), x_offset, y_offset - 4 * cm, width=4 * cm, height=4 * cm)
-        x_offset += 4.6 * cm  # Ajustar o offset para o texto ao lado da imagem
+        image_reader = ImageReader(image_path)
+        image_width, image_height = image_reader.getSize()
+        aspect_ratio = image_width / image_height
+        img_width = 4 * cm
+        img_height = img_width / aspect_ratio
+        
+        if img_height > 4 * cm:
+            img_height = 4 * cm
+            img_width = img_height * aspect_ratio
+        
+        p.drawImage(image_reader, x_offset, y_offset - img_height, width=img_width, height=img_height)
+        x_offset += img_width + 1 * cm  # Ajustar o offset para o texto ao lado da imagem
 
     # Ajustar o tamanho e estilo do nome
     p.setFont("Helvetica-Bold", 17)
