@@ -327,14 +327,14 @@ def curriculo_pdf_view(request, pk):
 
     # Informações ao lado da foto
     p.drawString(x_offset, y_offset - 1.5 * cm, f"Data de Nascimento: {pessoa.data_de_nascimento.strftime('%d/%m/%Y')}")
-    p.drawString(x_offset, y_offset - 2 * cm, f"Sexo: {pessoa.sexo}")
-    p.drawString(x_offset, y_offset - 2.5 * cm, f"CPF: {pessoa.cpf} | RG: {pessoa.rg}")
+    p.drawString(x_offset, y_offset - 2 * cm, f"CNH: {pessoa.possui_cnh} | Categoria: {pessoa.categoria_da_cnh}")
+    p.drawString(x_offset, y_offset - 2.5 * cm, f"CPF: {pessoa.cpf}")
 
     # Espaço após as informações ao lado da foto
     y_offset -= 2.5 * cm
 
     # Endereço
-    p.drawString(x_offset, y_offset - 0.5 * cm, f"Endereço: {endereco.rua}, {endereco.numero} - {endereco.bairro}, {endereco.cidade} - {endereco.estado} - {endereco.cep}")
+    p.drawString(x_offset, y_offset - 0.5 * cm, f"Endereço: {endereco.rua}, {endereco.numero} - {endereco.bairro}, {endereco.cidade} - {endereco.estado}")
     # Espaço após o endereço
     y_offset -= 0.5 * cm
 
