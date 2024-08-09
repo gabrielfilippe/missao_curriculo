@@ -160,6 +160,7 @@ class Curriculo(models.Model):
     # area_de_interesse = models.ForeignKey(AreaInteresse, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Área de Interesse')
     subareas_de_interesse = models.ManyToManyField(SubareaInteresse, verbose_name='Subáreas de Interesse')
     informacoes_adicionais = models.TextField(verbose_name='Informações Adicionais')
+    status = models.BooleanField(default = True, verbose_name='Empregado ou não')
     criado_em = models.DateTimeField(auto_now_add=True, verbose_name='Criado em')
     atualizado_em = models.DateTimeField(auto_now=True, verbose_name='Atualizado em')
 

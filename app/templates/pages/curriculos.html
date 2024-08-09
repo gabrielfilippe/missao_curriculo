@@ -141,6 +141,9 @@
     const curriculoPdfUrl = '{% url "curriculo:curriculo_pdf" 1 %}'; // URL dummy for pattern
     const curriculoPdfBaseUrl = curriculoPdfUrl.slice(0, -2); // Remove '1/' at the end
 
+    const curriculoEditUrl = '{% url "curriculo:editar_curriculo" 1 %}'; // URL dummy for pattern
+    const curriculoEditBaseUrl = curriculoEditUrl.slice(0, -2); // Remove '1/' at the end
+
     $(document).ready(function () {
         function fetchCurriculos() {
             $.ajax({
@@ -152,7 +155,6 @@
                     tableBody.empty();
 
                     if (data.curriculos.length === 0) {
-                        // Se não houver currículos, exibe uma mensagem ou linha especial
                         var emptyRow = '<tr><td colspan="7" class="text-center">Nenhum currículo encontrado com os filtros selecionados.</td></tr>';
                         tableBody.append(emptyRow);
                     } else {
@@ -164,7 +166,10 @@
                             row += '<td>' + (curriculo.habilidades.length ? curriculo.habilidades.join('<br>') : '-') + '</td>';
                             row += '<td>' + curriculo.criado_em + '</td>';
                             row += '<td>' + curriculo.atualizado_em + '</td>';
-                            row += '<td><a href="' + curriculoPdfBaseUrl + curriculo.id + '/" class="btn btn-primary btn-sm" target="_blank">Gerar PDF</a></td>';
+                            row += '<td class="d-flex align-items-center justify-content-center">';
+                            row += '<a href="' + curriculoEditBaseUrl + curriculo.id + '/" class="btn btn-secondary btn-sm me-2"target="_blank">Editar</a>';
+                            row += '<a href="' + curriculoPdfBaseUrl + curriculo.id + '/" class="btn btn-primary btn-sm" target="_blank">Gerar PDF</a>';
+                            row += '</td>';
                             row += '</tr>';
                             tableBody.append(row);
                         });
@@ -173,18 +178,15 @@
             });
         }
 
-        // Fetch curriculos on input change
         $('#filtro-form').on('input change', function () {
             fetchCurriculos();
         });
 
-        // Reset filters
         $('#reset-filters').click(function () {
             $('#filtro-form').trigger('reset');
             fetchCurriculos();
         });
 
-        // Fetch curriculos on page load
         fetchCurriculos();
     });
 </script>

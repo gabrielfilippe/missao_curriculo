@@ -109,7 +109,7 @@ def pessoas(request):
 
 @login_required(login_url=reverse_lazy('curriculo:login'))
 def curriculos(request):
-    curriculos = Curriculo.objects.all()
+    curriculos = Curriculo.objects.filter(status = True)
     pessoa_sexo_choices = Pessoa.SEXO_CHOICES
     pessoa_categoria_choices = Pessoa.CATEGORIA_CHOICES
     areas_de_interesse = AreaInteresse.objects.all()
@@ -199,6 +199,34 @@ def criar_curriculo(request):
             }
 
             return render(request, 'pages/criar_curriculo.html', context)
+        
+#views da edição do curriculo
+@login_required(login_url=reverse_lazy('curriculo:login'))
+def editar_curriculo(request, id):
+    curriculo = get_object_or_404(Curriculo, id=id)
+
+    if request.method == 'GET':
+        pessoa_form = PessoaForm(instance=curriculo.pessoa)
+        contato_form = ContatoForm(instance=curriculo.pessoa.contato)
+        endereco_form = EnderecoForm(instance=curriculo.pessoa.endereco)
+        idioma_formset = IdiomaFormSet(instance=curriculo.pessoa)
+        curriculo_form = CurriculoForm(instance=curriculo)
+        formacao_formset = FormacaoAcademicaFormSet(instance=curriculo)
+        experiencia_formset = ExperienciaProfissionalFormSet(instance=curriculo)
+        habilidade_formset = HabilidadeFormSet(instance=curriculo)
+
+        context = {
+            'pessoa_form': pessoa_form,
+            'contato_form': contato_form,
+            'endereco_form': endereco_form,
+            'idioma_formset': idioma_formset,
+            'curriculo_form': curriculo_form,
+            'formacao_formset': formacao_formset,
+            'experiencia_formset': experiencia_formset,
+            'habilidade_formset': habilidade_formset,
+        }
+
+        return render(request, 'pages/editar_curriculo.html', context)
         
 
 @login_required(login_url=reverse_lazy('curriculo:login'))
@@ -382,7 +410,7 @@ def curriculo_pdf_view(request, pk):
         # Adicionar o texto das formações acadêmicas em forma de tópicos
         p.setFont("Helvetica", 11)
         for formacao in curriculo.formacaoacademica_set.all():
-            data_de_conclusao = formacao.data_de_conclusao.strftime('%m/%Y') if formacao.data_de_conclusao else 'Em andamento'
+            data_de_conclusao = formacao.data_de_conclusao.strftime('Conclusão: %m/%Y') if formacao.data_de_conclusao else 'Em andamento'
             formacao_text = f"\u2022 {formacao.curso} - {formacao.instituicao.nome} - {data_de_conclusao}"
             p.drawString(2.0 * cm, y_offset, formacao_text)
             y_offset -= 0.5 * cm
@@ -403,7 +431,7 @@ def curriculo_pdf_view(request, pk):
         p.setFont("Helvetica", 11)
         for experiencia in curriculo.experienciaprofissional_set.all():
             data_de_saida = experiencia.data_de_saida.strftime('%m/%Y') if experiencia.data_de_saida else 'Presente'
-            exp_text = f"{experiencia.cargo} - {experiencia.empresa.nome} - {experiencia.data_de_inicio.strftime('%m/%Y')} - {data_de_saida}"
+            exp_text = f"Cargo: {experiencia.cargo} - {experiencia.empresa.nome} - Período: {experiencia.data_de_inicio.strftime('%m/%Y')} - {data_de_saida}"
             p.drawString(2 * cm, y_offset, exp_text)
             if experiencia.descricao:
                 y_offset -= 0.5 * cm
@@ -470,3 +498,5 @@ def curriculo_pdf_view(request, pk):
     response.write(buffer.getvalue())
     buffer.close()
     return response
+
+

@@ -13,4 +13,5 @@ urlpatterns = [
     path('pessoas/', pessoas, name='pessoas'),
     path('filtrar_curriculos/', filtrar_curriculos, name='filtrar_curriculos'),
     path('curriculo/<int:pk>/', curriculo_pdf_view, name='curriculo_pdf'),
+    path('curriculo/editar/<int:id>/', editar_curriculo, name='editar_curriculo'),
 ]
