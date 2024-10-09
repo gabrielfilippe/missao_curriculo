@@ -9,5 +9,5 @@ $(document).ready(function() {
         }
     });
     $('#id_cep').mask('00000-000');
-    $('.date-field').mask('00/00/0000');
+    // $('.date-field').mask('00/00/0000');
 });

@@ -183,7 +183,7 @@ def criar_curriculo(request):
 
             messages.success(request, 'Currículo criado com sucesso!')
 
-            return redirect('curriculos')
+            return redirect('curriculo:curriculos')
         else:
             messages.error(request, 'Erro ao criar currículo!')
 
@@ -227,6 +227,50 @@ def editar_curriculo(request, id):
         }
 
         return render(request, 'pages/editar_curriculo.html', context)
+    
+    elif request.method == 'POST':
+        pessoa_form = PessoaForm(request.POST, request.FILES, instance=curriculo.pessoa)
+        contato_form = ContatoForm(request.POST, instance=curriculo.pessoa.contato)
+        endereco_form = EnderecoForm(request.POST, instance=curriculo.pessoa.endereco)
+        idioma_formset = IdiomaFormSet(request.POST, instance=curriculo.pessoa)
+        curriculo_form = CurriculoForm(request.POST, instance=curriculo)
+        formacao_formset = FormacaoAcademicaFormSet(request.POST, instance=curriculo)
+        experiencia_formset = ExperienciaProfissionalFormSet(request.POST, instance=curriculo)
+        habilidade_formset = HabilidadeFormSet(request.POST, instance=curriculo)
+
+        if (pessoa_form.is_valid() and contato_form.is_valid() and endereco_form.is_valid() and
+                idioma_formset.is_valid() and curriculo_form.is_valid() and
+                formacao_formset.is_valid() and experiencia_formset.is_valid() and habilidade_formset.is_valid()):
+            with transaction.atomic():
+                pessoa_form.save()
+                contato_form.save()
+                endereco_form.save()
+                idioma_formset.save()  # Save ManyToMany fields
+                curriculo_form.save()
+                formacao_formset.save()
+                experiencia_formset.save()
+                habilidade_formset.save()
+
+            messages.success(request, 'Currículo editado com sucesso!')
+            return redirect('curriculo:curriculos')
+        else:
+            messages.error(request, 'Erro ao editar currículo!')
+
+            context = {
+                'pessoa_form': pessoa_form,
+                'contato_form': contato_form,
+                'endereco_form': endereco_form,
+                'idioma_formset': idioma_formset,
+                'curriculo_form': curriculo_form,
+                'formacao_formset': formacao_formset,
+                'experiencia_formset': experiencia_formset,
+                'habilidade_formset': habilidade_formset,
+            }
+
+            return render(request, 'pages/editar_curriculo.html', context)
+
+    
+    
         
 
 @login_required(login_url=reverse_lazy('curriculo:login'))

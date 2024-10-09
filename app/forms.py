@@ -85,8 +85,8 @@ class FormacaoAcademicaForm(forms.ModelForm):
             'instituicao': forms.Select(attrs={'placeholder': 'Selecione a instituição'}),
             'grau': forms.TextInput(attrs={'placeholder': 'Ex: Bacharelado'}),
             'curso': forms.TextInput(attrs={'placeholder': 'Ex: Ciência da Computação'}),
-            'data_de_inicio': forms.TextInput(attrs={'placeholder': 'Ex: 01/01/2015', 'type': 'text', 'class': 'date-field'}),
-            'data_de_conclusao': forms.TextInput(attrs={'placeholder': 'Ex: 01/01/2019', 'type': 'text', 'class': 'date-field'}),
+            'data_de_inicio': forms.DateInput(attrs={'placeholder': 'Ex: 01/01/2015', 'type': 'text', 'class': 'date-field'}),
+            'data_de_conclusao': forms.DateInput(attrs={'placeholder': 'Ex: 01/01/2019', 'type': 'text', 'class': 'date-field'}),
         }
 
 class EmpresaForm(forms.ModelForm):
@@ -111,7 +111,7 @@ class HabilidadeForm(forms.ModelForm):
         model = Habilidade
         fields = '__all__'
         widgets = {
-            'nome': forms.TextInput(attrs={'placeholder': 'Ex: Python'}),
+            'nome': forms.TextInput(attrs={'placeholder': 'Ex: Proativo'}),
         }
 
 # Formsets
