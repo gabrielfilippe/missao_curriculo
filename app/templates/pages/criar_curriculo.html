@@ -51,6 +51,9 @@
                     {{ pessoa_form.e_primeiro_emprego|as_crispy_field }}
                 </div>
                 <div class="col-12">
+                    {{ pessoa_form.idiomas|as_crispy_field }}
+                </div>
+                <div class="col-12">
                     {{ pessoa_form.imagem|as_crispy_field }}
                 </div>
             </div>
@@ -94,26 +97,6 @@
                 <div class="col-sm-6 col-md-4 col-lg-3">
                     {{ endereco_form.estado|as_crispy_field }}
                 </div>
-            </div>
-        </fieldset>
-    </div>
-    <div class="card p-3 mt-3">
-        <fieldset>
-            <legend>Idiomas</legend>
-            {{ idioma_formset.management_form }}
-            <div class="card p-3">
-                {% for form_idioma in idioma_formset %}
-                <div class="idioma-formset">
-                    <div class="row">
-                        <div class="col-md-6">
-                            {{ form_idioma.nome|as_crispy_field }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ form_idioma.nivel|as_crispy_field }}
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
             </div>
         </fieldset>
     </div>
@@ -210,14 +193,6 @@
 {% block javascript %}
 <script>
     $(document).ready(function () {
-        // Inicializar o formset de idiomas
-        $('.idioma-formset').formset({
-            addText: 'Adicionar Idioma',
-            deleteText: 'Remover',
-            addCssClass: 'btn btn-primary w-100',
-            deleteCssClass: 'btn btn-danger mb-3',
-            prefix: '{{ idioma_formset.prefix }}',
-        });
 
         // Inicializar o formset de formação
         $('.formacao-formset').formset({
@@ -257,7 +232,7 @@
 
         // Inicialmente esconder o campo se o checkbox não estiver marcado
         if (!$('#id_possui_cnh').is(':checked')) {
-            $('#div_id_categoria').hide();
+            $('#div_id_categoria_da_cnh').hide();
         }
 
         // função para limpar o campo de CEP
@@ -279,8 +254,9 @@
                     if (!data.erro) { // Se não houver erro na resposta da API
                         $('#id_cidade').val(data.localidade); // Preenche o campo de cidade
                         $('#id_estado').val(data.uf); // Preenche o campo de estado
-                        $('#id_bairro').val(data.bairro); // Preenche o campo de bairro
+                        // $('#id_bairro').val(data.bairro); // Preenche o campo de bairro
                         $('#id_endereco').val(data.logradouro); // Preenche o campo de endereço
+                        $('#id_bairro').focus();
                     } else {
                         alert('CEP não encontrado.');
                     }
@@ -288,6 +264,11 @@
                     console.log('Erro ao buscar o CEP.');
                 });
             }
+        });
+
+        $('#id_idiomas').select2({
+            placeholder: 'Selecione o idioma que domina:',
+            allowClear: true,
         });
 
         // Inicializar o campo de subáreas de interesse com o Select2

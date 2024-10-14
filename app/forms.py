@@ -20,6 +20,7 @@ class PessoaForm(forms.ModelForm):
             'possui_cnh': forms.CheckboxInput(attrs={'placeholder': 'Você possui CNH?'}),
             'categoria': forms.Select(attrs={'placeholder': 'Selecione a categoria da CNH'}),
             'e_primeiro_emprego': forms.CheckboxInput(attrs={'placeholder': 'É seu primeiro emprego?'}),
+            'idiomas': forms.SelectMultiple(attrs={'placeholder': 'Selecione o idioma que domina:'}),
             'imagem': forms.ClearableFileInput(attrs={'placeholder': 'Envie uma imagem'}),
         }
 
@@ -46,10 +47,10 @@ class EnderecoForm(forms.ModelForm):
             'cep': forms.TextInput(attrs={'placeholder': 'Ex: 12345-678', 'pattern': '[0-9]{5}-[0-9]{3}', 'title': 'Formato: 12345-678'}),
         }
 
-class IdiomaForm(forms.ModelForm):
-    class Meta:
-        model = Idioma
-        fields = '__all__'
+# class IdiomaForm(forms.ModelForm):
+#     class Meta:
+#         model = Idioma
+#         fields = '__all__'
 
 class AreaInteresseForm(forms.ModelForm):
     class Meta:
@@ -85,8 +86,8 @@ class FormacaoAcademicaForm(forms.ModelForm):
             'instituicao': forms.Select(attrs={'placeholder': 'Selecione a instituição'}),
             'grau': forms.TextInput(attrs={'placeholder': 'Ex: Bacharelado'}),
             'curso': forms.TextInput(attrs={'placeholder': 'Ex: Ciência da Computação'}),
-            'data_de_inicio': forms.DateInput(attrs={'placeholder': 'Ex: 01/01/2015', 'type': 'text', 'class': 'date-field'}),
-            'data_de_conclusao': forms.DateInput(attrs={'placeholder': 'Ex: 01/01/2019', 'type': 'text', 'class': 'date-field'}),
+            'data_de_inicio': forms.DateInput(attrs={'placeholder': 'Ex: 01/01/2015', 'class': 'date-field'}),
+            'data_de_conclusao': forms.DateInput(attrs={'placeholder': 'Ex: 01/01/2019', 'class': 'date-field'}),
         }
 
 class EmpresaForm(forms.ModelForm):
@@ -101,8 +102,8 @@ class ExperienciaProfissionalForm(forms.ModelForm):
         widgets = {
             'empresa': forms.Select(attrs={'placeholder': 'Selecione a empresa'}),
             'cargo': forms.TextInput(attrs={'placeholder': 'Ex: Desenvolvedor Web'}),
-            'data_de_inicio': forms.TextInput(attrs={'placeholder': 'Ex: 01/01/2015', 'type': 'text', 'class': 'date-field'}),
-            'data_de_saida': forms.TextInput(attrs={'placeholder': 'Ex: 01/01/2019', 'type': 'text', 'class': 'date-field'}),
+            'data_de_inicio': forms.DateInput(attrs={'placeholder': 'Ex: 01/01/2015', 'class': 'date-field'}),
+            'data_de_saida': forms.DateInput(attrs={'placeholder': 'Ex: 01/01/2019', 'class': 'date-field'}),
             'descricao': forms.Textarea(attrs={'placeholder': 'Ex: Desenvolvimento de aplicações web com Django', 'rows': 3}),
         }
 
@@ -116,23 +117,9 @@ class HabilidadeForm(forms.ModelForm):
 
 # Formsets
 
-class CustomBaseInlineFormSet(BaseInlineFormSet):
-    def __init__(self, *args, **kwargs):
-        super(CustomBaseInlineFormSet, self).__init__(*args, **kwargs)
-        for form in self.forms:
-            form.empty_permitted = False
 
-def custom_formset_factory(parent_model, model, form, formset=BaseInlineFormSet, **kwargs):
-    FormSet = inlineformset_factory(parent_model, model, form=form, formset=formset, **kwargs)
 
-    class CustomFormSet(FormSet):
-        def add_fields(self, form, index):
-            super().add_fields(form, index)
-            form.fields['DELETE'].widget = forms.HiddenInput()
 
-    return CustomFormSet
-
-IdiomaFormSet = custom_formset_factory(Pessoa, Idioma, form=IdiomaForm, extra=1)
-FormacaoAcademicaFormSet = custom_formset_factory(Curriculo, FormacaoAcademica, form=FormacaoAcademicaForm, extra=1)
-ExperienciaProfissionalFormSet = custom_formset_factory(Curriculo, ExperienciaProfissional, form=ExperienciaProfissionalForm, extra=1)
-HabilidadeFormSet = custom_formset_factory(Curriculo, Habilidade, form=HabilidadeForm, extra=1)
+FormacaoAcademicaFormSet = inlineformset_factory(Curriculo, FormacaoAcademica, form=FormacaoAcademicaForm, extra=1)
+ExperienciaProfissionalFormSet = inlineformset_factory(Curriculo, ExperienciaProfissional, form=ExperienciaProfissionalForm, extra=1)
+HabilidadeFormSet = inlineformset_factory(Curriculo, Habilidade, form=HabilidadeForm, extra=1)

@@ -130,7 +130,6 @@ def criar_curriculo(request):
         pessoa_form = PessoaForm()
         contato_form = ContatoForm()
         endereco_form = EnderecoForm()
-        idioma_formset = IdiomaFormSet()
         curriculo_form = CurriculoForm()
         formacao_formset = FormacaoAcademicaFormSet()
         experiencia_formset = ExperienciaProfissionalFormSet()
@@ -140,7 +139,6 @@ def criar_curriculo(request):
             'pessoa_form': pessoa_form,
             'contato_form': contato_form,
             'endereco_form': endereco_form,
-            'idioma_formset': idioma_formset,
             'curriculo_form': curriculo_form,
             'formacao_formset': formacao_formset,
             'experiencia_formset': experiencia_formset,
@@ -152,13 +150,12 @@ def criar_curriculo(request):
         pessoa_form = PessoaForm(request.POST, request.FILES)
         contato_form = ContatoForm(request.POST)
         endereco_form = EnderecoForm(request.POST)
-        idioma_formset = IdiomaFormSet(request.POST)
         curriculo_form = CurriculoForm(request.POST)
         formacao_formset = FormacaoAcademicaFormSet(request.POST)
         experiencia_formset = ExperienciaProfissionalFormSet(request.POST)
         habilidade_formset = HabilidadeFormSet(request.POST)
 
-        if pessoa_form.is_valid() and contato_form.is_valid() and endereco_form.is_valid() and idioma_formset.is_valid() and curriculo_form.is_valid() and formacao_formset.is_valid() and experiencia_formset.is_valid() and habilidade_formset.is_valid():
+        if pessoa_form.is_valid() and contato_form.is_valid() and endereco_form.is_valid() and curriculo_form.is_valid() and formacao_formset.is_valid() and experiencia_formset.is_valid() and habilidade_formset.is_valid():
             with transaction.atomic():
                 pessoa = pessoa_form.save()
                 contato = contato_form.save(commit=False)
@@ -167,8 +164,6 @@ def criar_curriculo(request):
                 endereco = endereco_form.save(commit=False)
                 endereco.pessoa = pessoa
                 endereco.save()
-                idioma_formset.instance = pessoa
-                idioma_formset.save()
                 curriculo = curriculo_form.save(commit=False)
                 curriculo.usuario = request.user
                 curriculo.pessoa = pessoa
@@ -191,7 +186,6 @@ def criar_curriculo(request):
                 'pessoa_form': pessoa_form,
                 'contato_form': contato_form,
                 'endereco_form': endereco_form,
-                'idioma_formset': idioma_formset,
                 'curriculo_form': curriculo_form,
                 'formacao_formset': formacao_formset,
                 'experiencia_formset': experiencia_formset,
@@ -203,13 +197,12 @@ def criar_curriculo(request):
 #views da edição do curriculo
 @login_required(login_url=reverse_lazy('curriculo:login'))
 def editar_curriculo(request, id):
-    curriculo = get_object_or_404(Curriculo, id=id)
+    curriculo = get_object_or_404(Curriculo, id=id, usuario=request.user)
 
     if request.method == 'GET':
         pessoa_form = PessoaForm(instance=curriculo.pessoa)
         contato_form = ContatoForm(instance=curriculo.pessoa.contato)
         endereco_form = EnderecoForm(instance=curriculo.pessoa.endereco)
-        idioma_formset = IdiomaFormSet(instance=curriculo.pessoa)
         curriculo_form = CurriculoForm(instance=curriculo)
         formacao_formset = FormacaoAcademicaFormSet(instance=curriculo)
         experiencia_formset = ExperienciaProfissionalFormSet(instance=curriculo)
@@ -219,55 +212,68 @@ def editar_curriculo(request, id):
             'pessoa_form': pessoa_form,
             'contato_form': contato_form,
             'endereco_form': endereco_form,
-            'idioma_formset': idioma_formset,
             'curriculo_form': curriculo_form,
             'formacao_formset': formacao_formset,
             'experiencia_formset': experiencia_formset,
             'habilidade_formset': habilidade_formset,
+            'edit_mode': True  # Adiciona uma flag para identificar a edição no template
         }
 
-        return render(request, 'pages/editar_curriculo.html', context)
+        return render(request, 'pages/criar_curriculo.html', context)
     
     elif request.method == 'POST':
         pessoa_form = PessoaForm(request.POST, request.FILES, instance=curriculo.pessoa)
         contato_form = ContatoForm(request.POST, instance=curriculo.pessoa.contato)
         endereco_form = EnderecoForm(request.POST, instance=curriculo.pessoa.endereco)
-        idioma_formset = IdiomaFormSet(request.POST, instance=curriculo.pessoa)
         curriculo_form = CurriculoForm(request.POST, instance=curriculo)
         formacao_formset = FormacaoAcademicaFormSet(request.POST, instance=curriculo)
         experiencia_formset = ExperienciaProfissionalFormSet(request.POST, instance=curriculo)
         habilidade_formset = HabilidadeFormSet(request.POST, instance=curriculo)
 
-        if (pessoa_form.is_valid() and contato_form.is_valid() and endereco_form.is_valid() and
-                idioma_formset.is_valid() and curriculo_form.is_valid() and
-                formacao_formset.is_valid() and experiencia_formset.is_valid() and habilidade_formset.is_valid()):
+        if pessoa_form.is_valid() and contato_form.is_valid() and endereco_form.is_valid() and curriculo_form.is_valid() and formacao_formset.is_valid() and experiencia_formset.is_valid() and habilidade_formset.is_valid():
             with transaction.atomic():
-                pessoa_form.save()
-                contato_form.save()
-                endereco_form.save()
-                idioma_formset.save()  # Save ManyToMany fields
-                curriculo_form.save()
+                pessoa = pessoa_form.save()
+                contato = contato_form.save(commit=False)
+                contato.pessoa = pessoa
+                contato.save()
+                endereco = endereco_form.save(commit=False)
+                endereco.pessoa = pessoa
+                endereco.save()
+                curriculo = curriculo_form.save(commit=False)
+                curriculo.usuario = request.user
+                curriculo.pessoa = pessoa
+                curriculo.save()
+                curriculo_form.save_m2m()  # Salvar os ManyToMany fields
+                formacao_formset.instance = curriculo
                 formacao_formset.save()
+                experiencia_formset.instance = curriculo
                 experiencia_formset.save()
+                habilidade_formset.instance = curriculo
                 habilidade_formset.save()
 
-            messages.success(request, 'Currículo editado com sucesso!')
+            messages.success(request, 'Currículo atualizado com sucesso!')
+
             return redirect('curriculo:curriculos')
         else:
-            messages.error(request, 'Erro ao editar currículo!')
+            print(curriculo_form.errors)
+            print(formacao_formset.errors)
+            print(experiencia_formset.errors)
+            print(habilidade_formset.errors)
+            messages.error(request, 'Erro ao atualizar currículo!')
+            
 
             context = {
                 'pessoa_form': pessoa_form,
                 'contato_form': contato_form,
                 'endereco_form': endereco_form,
-                'idioma_formset': idioma_formset,
                 'curriculo_form': curriculo_form,
                 'formacao_formset': formacao_formset,
                 'experiencia_formset': experiencia_formset,
                 'habilidade_formset': habilidade_formset,
+                'edit_mode': True  # Adiciona uma flag para identificar a edição no template
             }
 
-            return render(request, 'pages/editar_curriculo.html', context)
+            return render(request, 'pages/criar_curriculo.html', context)
 
     
     
@@ -399,7 +405,7 @@ def curriculo_pdf_view(request, pk):
 
     # Informações ao lado da foto
     p.drawString(x_offset, y_offset - 1.5 * cm, f"Data de Nascimento: {pessoa.data_de_nascimento.strftime('%d/%m/%Y')}")
-    p.drawString(x_offset, y_offset - 2 * cm, f"CNH: {pessoa.possui_cnh} | Categoria: {pessoa.categoria_da_cnh}")
+    p.drawString(x_offset, y_offset - 2 * cm, f"CNH: Sim | Categoria: {pessoa.categoria_da_cnh}" if pessoa.possui_cnh else f'CNH: Não possui')
     p.drawString(x_offset, y_offset - 2.5 * cm, f"CPF: {pessoa.cpf}")
 
     # Espaço após as informações ao lado da foto
@@ -462,7 +468,7 @@ def curriculo_pdf_view(request, pk):
         # Ajustar o y_offset após adicionar as formações acadêmicas
         y_offset -= 0.5 * cm
 
-    # Experiência Profissional
+# Experiência Profissional
     if curriculo.experienciaprofissional_set.exists():
         p.setFont("Helvetica-Bold", 12)
         p.drawString(2 * cm, y_offset, "EXPERIÊNCIA PROFISSIONAL")
@@ -472,19 +478,33 @@ def curriculo_pdf_view(request, pk):
         p.line(2 * cm, y_offset, width - 2 * cm, y_offset)
         y_offset -= 0.8 * cm
 
-        p.setFont("Helvetica", 11)
+        styles = getSampleStyleSheet()
+        normal_style = styles["Normal"]
+
         for experiencia in curriculo.experienciaprofissional_set.all():
             data_de_saida = experiencia.data_de_saida.strftime('%m/%Y') if experiencia.data_de_saida else 'Presente'
             exp_text = f"Cargo: {experiencia.cargo} - {experiencia.empresa.nome} - Período: {experiencia.data_de_inicio.strftime('%m/%Y')} - {data_de_saida}"
-            p.drawString(2 * cm, y_offset, exp_text)
+
+            # Criar um parágrafo para quebrar as linhas automaticamente
+            exp_paragraph = Paragraph(exp_text, normal_style)
+            w, h = exp_paragraph.wrap(width - 4 * cm, y_offset)  # Ajusta a largura disponível e a altura
+            exp_paragraph.drawOn(p, 2 * cm, y_offset - h)  # Desenha o parágrafo no PDF
+            y_offset -= h + 0.5 * cm  # Atualiza o y_offset para a próxima linha
+
             if experiencia.descricao:
-                y_offset -= 0.5 * cm
-                p.drawString(2 * cm, y_offset, experiencia.descricao)
-            y_offset -= 1 * cm
+                desc_paragraph = Paragraph(experiencia.descricao, normal_style)
+                w, h = desc_paragraph.wrap(width - 4 * cm, y_offset)
+                desc_paragraph.drawOn(p, 2 * cm, y_offset - h)
+                y_offset -= h + 1 * cm
 
-        y_offset -= 0.3 * cm
+            # Verificar se o y_offset está muito baixo para o próximo item e ajustar
+            if y_offset < 2 * cm:
+                break  # Pode-se adicionar alguma lógica de quebra de página, se necessário
 
-     # Habilidades
+
+
+
+    # Habilidades
     if curriculo.habilidade_set.exists():
         p.setFont("Helvetica-Bold", 12)
         p.drawString(2 * cm, y_offset, "HABILIDADES")
@@ -508,14 +528,14 @@ def curriculo_pdf_view(request, pk):
     # y_offset -= 1.5 * cm
 
     # Idiomas
-    if pessoa.idioma_set.exists():
+    if pessoa.idiomas.exists():
         p.setFont("Helvetica-Bold", 12)
         p.drawString(2 * cm, y_offset, "IDIOMAS")
         y_offset -= 0.2 * cm
         p.line(2 * cm, y_offset, width - 2 * cm, y_offset)
         y_offset -= 0.8 * cm
         p.setFont("Helvetica", 11)
-        for idioma in pessoa.idioma_set.all():
+        for idioma in pessoa.idiomas.all():
             idioma_text = f"\u2022 {idioma.nome} - {idioma.nivel}"
             p.drawString(2 * cm, y_offset, idioma_text)
             y_offset -= 0.5 * cm
@@ -533,7 +553,25 @@ def curriculo_pdf_view(request, pk):
         for subarea in curriculo.subareas_de_interesse.all():
             subarea_text = f"\u2022 {subarea.nome} ({subarea.area_de_interesse.nome})"
             p.drawString(2 * cm, y_offset, subarea_text)
+
             y_offset -= 0.5 * cm
+
+    #adicionando informações adicionais no pdf
+    y_offset -= 0.5 * cm
+
+    if curriculo.informacoes_adicionais:
+        p.setFont("Helvetica-Bold", 12)
+        p.drawString(2 * cm, y_offset, "INFORMAÇÕES ADICIONAIS")
+        #Distancia entre o topico e a linha separadora
+        y_offset -= 0.2 * cm
+        p.line(2 * cm, y_offset, width - 2 * cm, y_offset)
+        y_offset -= 0.3 * cm
+
+        # Adiciona o resumo como um parágrafo com quebra de linha automática
+        informacoes_adicionais = Paragraph(curriculo.informacoes_adicionais, styles['Normal'])
+        informacoes_adicionais_width, informacoes_adicionais_height = informacoes_adicionais.wrap(width - 4 * cm, height - y_offset)
+        informacoes_adicionais.drawOn(p, 2 * cm, y_offset - informacoes_adicionais_height)
+        y_offset -= informacoes_adicionais_height + 0.8 * cm
 
     p.showPage()
     p.save()

@@ -5,8 +5,10 @@ from django.utils.safestring import mark_safe
 # Register your models here.
 class PessoaAdmin(admin.ModelAdmin):
     class IdiomaInline(admin.TabularInline):
-        model = Idioma
+        model = Pessoa.idiomas.through
         extra = 0
+        verbose_name = 'idioma'
+        verbose_name_plural = 'idiomas'
 
     class ContatoInline(admin.TabularInline):
         model = Contato
@@ -19,12 +21,12 @@ class PessoaAdmin(admin.ModelAdmin):
     inlines = [ContatoInline, EnderecoInline, IdiomaInline]
     exclude = ['idiomas']
     fieldsets = [('INFORMAÇÕES PESSOAIS', {'fields': ['nome', 'sobrenome', 'data_de_nascimento', 'sexo', 'cpf', 'rg', 'e_pcd', 'possui_cnh', 'categoria_da_cnh', 'e_primeiro_emprego', 'imagem']})]
-    list_display = ['nome', 'sobrenome', 'data_de_nascimento', 'sexo', 'cpf', 'rg', 'e_pcd', 'possui_cnh', 'categoria_da_cnh', 'e_primeiro_emprego', 'imagem', 'get_idiomas']
+    list_display = ['nome', 'sobrenome', 'data_de_nascimento', 'sexo', 'cpf', 'rg', 'e_pcd', 'possui_cnh', 'categoria_da_cnh', 'e_primeiro_emprego', 'imagem']
 
-    def get_idiomas(self, obj):
-        return mark_safe('<br>'.join([idioma.nome for idioma in obj.idioma_set.all()]) if obj.idioma_set.all() else '-')
+    # def get_idiomas(self, obj):
+    #     return mark_safe('<br>'.join([idioma.nome for idioma in obj.idioma_set.all()]) if obj.idioma_set.all() else '-')
     
-    get_idiomas.short_description = 'Idiomas'
+    # get_idiomas.short_description = 'Idiomas'
 
 class AreaInteresseAdmin(admin.ModelAdmin):
     class SubareaInteresseInline(admin.TabularInline):

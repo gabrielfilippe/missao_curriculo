@@ -1,6 +1,41 @@
 from django.contrib.auth.models import User
 from django.db import models
 
+class Idioma(models.Model):
+    IDIOMA_CHOICES = [
+        ('Inglês', 'Inglês'),
+        ('Espanhol', 'Espanhol'),
+        ('Francês', 'Francês'),
+        ('Alemão', 'Alemão'),
+        ('Italiano', 'Italiano'),
+        ('Mandarim', 'Mandarim'),
+        ('Japonês', 'Japonês'),
+        ('Russo', 'Russo'),
+        ('Coreano', 'Coreano'),
+        ('Árabe', 'Árabe'),
+        ('Hebraico', 'Hebraico'),
+        ('Hindi', 'Hindi'),
+        ('Outro', 'Outro'),
+    ]
+
+    NIVEL_CHOICES = [
+        ('Básico', 'Básico'),
+        ('Intermediário', 'Intermediário'),
+        ('Avançado', 'Avançado'),
+        ('Fluente', 'Fluente'),
+    ]
+
+    # pessoa = models.ForeignKey(Pessoa, on_delete=models.CASCADE, verbose_name='Pessoa')
+    nome = models.CharField(max_length=255, choices=IDIOMA_CHOICES, verbose_name='Idioma')
+    nivel = models.CharField(max_length=255, choices=NIVEL_CHOICES, verbose_name='Nível')
+
+    class Meta:
+        verbose_name = 'Idioma'
+        verbose_name_plural = 'Idiomas'
+
+    def __str__(self):
+        return f'{self.nome} ({self.nivel})'
+
 # Create your models here.
 class Pessoa(models.Model):
     SEXO_CHOICES = [
@@ -28,7 +63,7 @@ class Pessoa(models.Model):
     possui_cnh = models.BooleanField(default=False, verbose_name='Possui CNH?')
     categoria_da_cnh = models.CharField(max_length=255, choices=CATEGORIA_CHOICES, null=True, blank=True, verbose_name='Categoria da CNH')
     e_primeiro_emprego = models.BooleanField(default=False, verbose_name='Primeiro Emprego?')
-    # idiomas = models.ManyToManyField(Idioma, verbose_name='Idiomas')
+    idiomas = models.ManyToManyField(Idioma, verbose_name='Idiomas')
     imagem = models.ImageField(upload_to='imagens/', null=True, blank=True, verbose_name='Imagem')
 
     class Meta:
@@ -96,41 +131,6 @@ class Endereco(models.Model):
 
     def __str__(self):
         return self.rua + ', ' + str(self.numero) + ' - ' + self.bairro + ', ' + self.cidade + ' - ' + self.estado
-    
-class Idioma(models.Model):
-    IDIOMA_CHOICES = [
-        ('Inglês', 'Inglês'),
-        ('Espanhol', 'Espanhol'),
-        ('Francês', 'Francês'),
-        ('Alemão', 'Alemão'),
-        ('Italiano', 'Italiano'),
-        ('Mandarim', 'Mandarim'),
-        ('Japonês', 'Japonês'),
-        ('Russo', 'Russo'),
-        ('Coreano', 'Coreano'),
-        ('Árabe', 'Árabe'),
-        ('Hebraico', 'Hebraico'),
-        ('Hindi', 'Hindi'),
-        ('Outro', 'Outro'),
-    ]
-
-    NIVEL_CHOICES = [
-        ('Básico', 'Básico'),
-        ('Intermediário', 'Intermediário'),
-        ('Avançado', 'Avançado'),
-        ('Fluente', 'Fluente'),
-    ]
-
-    pessoa = models.ForeignKey(Pessoa, on_delete=models.CASCADE, verbose_name='Pessoa')
-    nome = models.CharField(max_length=255, choices=IDIOMA_CHOICES, verbose_name='Idioma')
-    nivel = models.CharField(max_length=255, choices=NIVEL_CHOICES, verbose_name='Nível')
-
-    class Meta:
-        verbose_name = 'Idioma'
-        verbose_name_plural = 'Idiomas'
-
-    def __str__(self):
-        return self.nome
     
 class AreaInteresse(models.Model):
     nome = models.CharField(max_length=255, verbose_name='Nome')
