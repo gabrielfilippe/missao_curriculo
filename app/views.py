@@ -198,52 +198,35 @@ def criar_curriculo(request):
 @login_required(login_url=reverse_lazy('curriculo:login'))
 def editar_curriculo(request, id):
     curriculo = get_object_or_404(Curriculo, id=id, usuario=request.user)
+    pessoa = curriculo.pessoa
 
-    if request.method == 'GET':
-        pessoa_form = PessoaForm(instance=curriculo.pessoa)
-        contato_form = ContatoForm(instance=curriculo.pessoa.contato)
-        endereco_form = EnderecoForm(instance=curriculo.pessoa.endereco)
-        curriculo_form = CurriculoForm(instance=curriculo)
-        formacao_formset = FormacaoAcademicaFormSet(instance=curriculo)
-        experiencia_formset = ExperienciaProfissionalFormSet(instance=curriculo)
-        habilidade_formset = HabilidadeFormSet(instance=curriculo)
-
-        context = {
-            'pessoa_form': pessoa_form,
-            'contato_form': contato_form,
-            'endereco_form': endereco_form,
-            'curriculo_form': curriculo_form,
-            'formacao_formset': formacao_formset,
-            'experiencia_formset': experiencia_formset,
-            'habilidade_formset': habilidade_formset,
-            'edit_mode': True  # Adiciona uma flag para identificar a edição no template
-        }
-
-        return render(request, 'pages/criar_curriculo.html', context)
-    
-    elif request.method == 'POST':
-        pessoa_form = PessoaForm(request.POST, request.FILES, instance=curriculo.pessoa)
-        contato_form = ContatoForm(request.POST, instance=curriculo.pessoa.contato)
-        endereco_form = EnderecoForm(request.POST, instance=curriculo.pessoa.endereco)
+    if request.method == 'POST':
+        pessoa_form = PessoaForm(request.POST, request.FILES, instance=pessoa)
         curriculo_form = CurriculoForm(request.POST, instance=curriculo)
-        formacao_formset = FormacaoAcademicaFormSet(request.POST, instance=curriculo)
-        experiencia_formset = ExperienciaProfissionalFormSet(request.POST, instance=curriculo)
-        habilidade_formset = HabilidadeFormSet(request.POST, instance=curriculo)
 
-        if pessoa_form.is_valid() and contato_form.is_valid() and endereco_form.is_valid() and curriculo_form.is_valid() and formacao_formset.is_valid() and experiencia_formset.is_valid() and habilidade_formset.is_valid():
+        contato_form = ContatoForm(request.POST, instance=pessoa.contato)
+        endereco_form = EnderecoForm(request.POST, instance=pessoa.endereco)
+
+        formacao_formset = FormacaoAcademicaFormSetUpdate(request.POST, instance=curriculo)
+        experiencia_formset = ExperienciaProfissionalFormSetUpdate(request.POST, instance=curriculo)
+        habilidade_formset = HabilidadeFormSetUpdate(request.POST, instance=curriculo)
+
+        if pessoa_form.is_valid() and curriculo_form.is_valid() and contato_form.is_valid() and endereco_form.is_valid() and formacao_formset.is_valid() and experiencia_formset.is_valid() and habilidade_formset.is_valid():
+
             with transaction.atomic():
                 pessoa = pessoa_form.save()
-                contato = contato_form.save(commit=False)
-                contato.pessoa = pessoa
-                contato.save()
-                endereco = endereco_form.save(commit=False)
-                endereco.pessoa = pessoa
-                endereco.save()
+                
+                contato_form.instance = pessoa
+                contato_form.save()
+                endereco_form.instance = pessoa
+                endereco_form.save()
                 curriculo = curriculo_form.save(commit=False)
                 curriculo.usuario = request.user
                 curriculo.pessoa = pessoa
                 curriculo.save()
-                curriculo_form.save_m2m()  # Salvar os ManyToMany fields
+
+                curriculo_form.save_m2m()
+
                 formacao_formset.instance = curriculo
                 formacao_formset.save()
                 experiencia_formset.instance = curriculo
@@ -251,33 +234,41 @@ def editar_curriculo(request, id):
                 habilidade_formset.instance = curriculo
                 habilidade_formset.save()
 
-            messages.success(request, 'Currículo atualizado com sucesso!')
+                messages.success(request, 'Currículo atualizado com sucesso!')
 
-            return redirect('curriculo:curriculos')
+                return redirect('curriculo:curriculos')
         else:
+            messages.error(request, 'Erro ao atualizar currículo!')
+
+            print(pessoa_form.errors)
+            print(contato_form.errors)
+            print(endereco_form.errors)
             print(curriculo_form.errors)
             print(formacao_formset.errors)
             print(experiencia_formset.errors)
             print(habilidade_formset.errors)
-            messages.error(request, 'Erro ao atualizar currículo!')
-            
+    else:
+        pessoa_form = PessoaForm(instance=pessoa)
+        contato_form = ContatoForm(instance=pessoa.contato)
+        endereco_form = EnderecoForm(instance=pessoa.endereco)
+        curriculo_form = CurriculoForm(instance=curriculo)
+        formacao_formset = FormacaoAcademicaFormSetUpdate(instance=curriculo)
+        experiencia_formset = ExperienciaProfissionalFormSetUpdate(instance=curriculo)
+        habilidade_formset = HabilidadeFormSetUpdate(instance=curriculo)
 
-            context = {
-                'pessoa_form': pessoa_form,
-                'contato_form': contato_form,
-                'endereco_form': endereco_form,
-                'curriculo_form': curriculo_form,
-                'formacao_formset': formacao_formset,
-                'experiencia_formset': experiencia_formset,
-                'habilidade_formset': habilidade_formset,
-                'edit_mode': True  # Adiciona uma flag para identificar a edição no template
-            }
+    context = {
+        'pessoa_form': pessoa_form,
+        'contato_form': contato_form,
+        'endereco_form': endereco_form,
+        'curriculo_form': curriculo_form,
+        'formacao_formset': formacao_formset,
+        'experiencia_formset': experiencia_formset,
+        'habilidade_formset': habilidade_formset
+    }
 
-            return render(request, 'pages/criar_curriculo.html', context)
+    return render(request, 'pages/editar_curriculo.html', context)
 
-    
-    
-        
+    return render(request, 'pages/editar_curriculo.html', context)
 
 @login_required(login_url=reverse_lazy('curriculo:login'))
 def filtrar_curriculos(request):

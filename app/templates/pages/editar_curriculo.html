@@ -51,6 +51,9 @@
                     {{ pessoa_form.e_primeiro_emprego|as_crispy_field }}
                 </div>
                 <div class="col-12">
+                    {{ pessoa_form.idiomas|as_crispy_field }}
+                </div>
+                <div class="col-12">
                     {{ pessoa_form.imagem|as_crispy_field }}
                 </div>
             </div>
@@ -60,12 +63,7 @@
         <fieldset>
             <legend>Informações de Contato</legend>
             <div class="row">
-                <div class="col-md-6">
-                    {{ contato_form.telefone|as_crispy_field }}
-                </div>
-                <div class="col-md-6">
-                    {{ contato_form.email|as_crispy_field }}
-                </div>
+                {{ contato_form|crispy }}
             </div>
         </fieldset>
     </div>
@@ -73,47 +71,7 @@
         <fieldset>
             <legend>Informações Residenciais</legend>
             <div class="row">
-                <div class="col-sm-8 col-lg-5">
-                    {{ endereco_form.rua|as_crispy_field }}
-                </div>
-                <div class="col-sm-4 col-lg-2">
-                    {{ endereco_form.numero|as_crispy_field }}
-                </div>
-                <div class="col-md-8 col-lg-5">
-                    {{ endereco_form.complemento|as_crispy_field }}
-                </div>
-                <div class="col-sm-6 col-md-4 col-lg-3">
-                    {{ endereco_form.bairro|as_crispy_field }}
-                </div>
-                <div class="col-sm-6 col-md-4 col-lg-3">
-                    {{ endereco_form.cep|as_crispy_field }}
-                </div>
-                <div class="col-sm-6 col-md-4 col-lg-3">
-                    {{ endereco_form.cidade|as_crispy_field }}
-                </div>
-                <div class="col-sm-6 col-md-4 col-lg-3">
-                    {{ endereco_form.estado|as_crispy_field }}
-                </div>
-            </div>
-        </fieldset>
-    </div>
-    <div class="card p-3 mt-3">
-        <fieldset>
-            <legend>Idiomas</legend>
-            {{ idioma_formset.management_form }}
-            <div class="card p-3">
-                {% for form_idioma in idioma_formset %}
-                <div class="idioma-formset">
-                    <div class="row">
-                        <div class="col-md-6">
-                            {{ form_idioma.nome|as_crispy_field }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ form_idioma.nivel|as_crispy_field }}
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
+                {{ endereco_form|crispy }}
             </div>
         </fieldset>
     </div>
@@ -140,21 +98,7 @@
                 {% for form_formacao in formacao_formset %}
                 <div class="formacao-formset">
                     <div class="row">
-                        <div class="col-md-4">
-                            {{ form_formacao.instituicao|as_crispy_field }}
-                        </div>
-                        <div class="col-md-4">
-                            {{ form_formacao.grau|as_crispy_field }}
-                        </div>
-                        <div class="col-md-4">
-                            {{ form_formacao.curso|as_crispy_field }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ form_formacao.data_de_inicio|as_crispy_field }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ form_formacao.data_de_conclusao|as_crispy_field }}
-                        </div>
+                        {{ form_formacao|crispy }}
                     </div>
                 </div>
                 {% endfor %}
@@ -169,21 +113,7 @@
                 {% for form_experiencia in experiencia_formset %}
                 <div class="experiencia-formset">
                     <div class="row">
-                        <div class="col-md-3">
-                            {{ form_experiencia.empresa|as_crispy_field }}
-                        </div>
-                        <div class="col-md-3">
-                            {{ form_experiencia.cargo|as_crispy_field }}
-                        </div>
-                        <div class="col-md-3">
-                            {{ form_experiencia.data_de_inicio|as_crispy_field }}
-                        </div>
-                        <div class="col-md-3">
-                            {{ form_experiencia.data_de_saida|as_crispy_field }}
-                        </div>
-                        <div class="col-12">
-                            {{ form_experiencia.descricao|as_crispy_field }}
-                        </div>
+                        {{ form_experiencia|crispy }}
                     </div>
                 </div>
                 {% endfor %}
@@ -210,15 +140,6 @@
 {% block javascript %}
 <script>
     $(document).ready(function () {
-        // Inicializar o formset de idiomas
-        $('.idioma-formset').formset({
-            addText: 'Adicionar Idioma',
-            deleteText: 'Remover',
-            addCssClass: 'btn btn-primary w-100',
-            deleteCssClass: 'btn btn-danger mb-3',
-            prefix: '{{ idioma_formset.prefix }}',
-        });
-
         // Inicializar o formset de formação
         $('.formacao-formset').formset({
             addText: 'Adicionar Formação',
@@ -293,6 +214,12 @@
         // Inicializar o campo de subáreas de interesse com o Select2
         $('#id_subareas_de_interesse').select2({
             placeholder: 'Selecione as subáreas de interesse',
+            allowClear: true,
+        });
+
+        // Inicializar o campo de subáreas de interesse com o Select2
+        $('#id_idiomas').select2({
+            placeholder: 'Selecione os idiomas',
             allowClear: true,
         });
     });

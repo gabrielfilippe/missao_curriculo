@@ -27,7 +27,7 @@ class PessoaForm(forms.ModelForm):
 class ContatoForm(forms.ModelForm):
     class Meta:
         model = Contato
-        exclude = ['pessoa']
+        fields = '__all__'
         widgets = {
             'telefone': forms.TextInput(attrs={'placeholder': 'Ex: (11) 98765-4321', 'type': 'tel'}),
             'email': forms.EmailInput(attrs={'placeholder': 'Ex: joaosilva@example.com'}),
@@ -36,7 +36,7 @@ class ContatoForm(forms.ModelForm):
 class EnderecoForm(forms.ModelForm):
     class Meta:
         model = Endereco
-        exclude = ['pessoa']
+        fields = '__all__'
         widgets = {
             'rua': forms.TextInput(attrs={'placeholder': 'Ex: Rua das Flores'}),
             'numero': forms.NumberInput(attrs={'placeholder': 'Ex: 123'}),
@@ -118,8 +118,10 @@ class HabilidadeForm(forms.ModelForm):
 # Formsets
 
 
+FormacaoAcademicaFormSet = inlineformset_factory(Curriculo, FormacaoAcademica, fields='__all__', extra=1, can_delete=False)
+ExperienciaProfissionalFormSet = inlineformset_factory(Curriculo, ExperienciaProfissional, fields='__all__', extra=1, can_delete=False)
+HabilidadeFormSet = inlineformset_factory(Curriculo, Habilidade, fields='__all__', extra=1, can_delete=False)
 
-
-FormacaoAcademicaFormSet = inlineformset_factory(Curriculo, FormacaoAcademica, form=FormacaoAcademicaForm, extra=1)
-ExperienciaProfissionalFormSet = inlineformset_factory(Curriculo, ExperienciaProfissional, form=ExperienciaProfissionalForm, extra=1)
-HabilidadeFormSet = inlineformset_factory(Curriculo, Habilidade, form=HabilidadeForm, extra=1)
+FormacaoAcademicaFormSetUpdate = inlineformset_factory(Curriculo, FormacaoAcademica, fields='__all__', extra=0, can_delete=True)
+ExperienciaProfissionalFormSetUpdate = inlineformset_factory(Curriculo, ExperienciaProfissional, fields='__all__', extra=0, can_delete=True)
+HabilidadeFormSetUpdate = inlineformset_factory(Curriculo, Habilidade, fields='__all__', extra=0, can_delete=True)
