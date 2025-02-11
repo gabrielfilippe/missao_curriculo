@@ -27,7 +27,7 @@ class PessoaForm(forms.ModelForm):
 class ContatoForm(forms.ModelForm):
     class Meta:
         model = Contato
-        fields = '__all__'
+        exclude = ['pessoa']
         widgets = {
             'telefone': forms.TextInput(attrs={'placeholder': 'Ex: (11) 98765-4321', 'type': 'tel'}),
             'email': forms.EmailInput(attrs={'placeholder': 'Ex: joaosilva@example.com'}),
@@ -36,7 +36,7 @@ class ContatoForm(forms.ModelForm):
 class EnderecoForm(forms.ModelForm):
     class Meta:
         model = Endereco
-        fields = '__all__'
+        exclude = ['pessoa']
         widgets = {
             'rua': forms.TextInput(attrs={'placeholder': 'Ex: Rua das Flores'}),
             'numero': forms.NumberInput(attrs={'placeholder': 'Ex: 123'}),

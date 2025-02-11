@@ -126,27 +126,7 @@ def curriculos(request):
 
 @login_required(login_url=reverse_lazy('curriculo:login'))
 def criar_curriculo(request):
-    if request.method == 'GET':
-        pessoa_form = PessoaForm()
-        contato_form = ContatoForm()
-        endereco_form = EnderecoForm()
-        curriculo_form = CurriculoForm()
-        formacao_formset = FormacaoAcademicaFormSet()
-        experiencia_formset = ExperienciaProfissionalFormSet()
-        habilidade_formset = HabilidadeFormSet()
-
-        context = {
-            'pessoa_form': pessoa_form,
-            'contato_form': contato_form,
-            'endereco_form': endereco_form,
-            'curriculo_form': curriculo_form,
-            'formacao_formset': formacao_formset,
-            'experiencia_formset': experiencia_formset,
-            'habilidade_formset': habilidade_formset
-        }
-
-        return render(request, 'pages/criar_curriculo.html', context)
-    elif request.method == 'POST':
+    if request.method == 'POST':
         pessoa_form = PessoaForm(request.POST, request.FILES)
         contato_form = ContatoForm(request.POST)
         endereco_form = EnderecoForm(request.POST)
@@ -158,17 +138,15 @@ def criar_curriculo(request):
         if pessoa_form.is_valid() and contato_form.is_valid() and endereco_form.is_valid() and curriculo_form.is_valid() and formacao_formset.is_valid() and experiencia_formset.is_valid() and habilidade_formset.is_valid():
             with transaction.atomic():
                 pessoa = pessoa_form.save()
-                contato = contato_form.save(commit=False)
-                contato.pessoa = pessoa
-                contato.save()
-                endereco = endereco_form.save(commit=False)
-                endereco.pessoa = pessoa
-                endereco.save()
+                contato_form.instance = pessoa
+                contato_form.save()
+                endereco_form.instance = pessoa
+                endereco_form.save()
                 curriculo = curriculo_form.save(commit=False)
                 curriculo.usuario = request.user
                 curriculo.pessoa = pessoa
                 curriculo.save()
-                curriculo_form.save_m2m()  # Salvar os ManyToMany fields
+                curriculo_form.save_m2m()
                 formacao_formset.instance = curriculo
                 formacao_formset.save()
                 experiencia_formset.instance = curriculo
@@ -176,23 +154,39 @@ def criar_curriculo(request):
                 habilidade_formset.instance = curriculo
                 habilidade_formset.save()
 
-            messages.success(request, 'Currículo criado com sucesso!')
+                messages.success(request, 'Currículo criado com sucesso!')
 
-            return redirect('curriculo:curriculos')
+                return redirect('curriculo:curriculos')
         else:
             messages.error(request, 'Erro ao criar currículo!')
 
-            context = {
-                'pessoa_form': pessoa_form,
-                'contato_form': contato_form,
-                'endereco_form': endereco_form,
-                'curriculo_form': curriculo_form,
-                'formacao_formset': formacao_formset,
-                'experiencia_formset': experiencia_formset,
-                'habilidade_formset': habilidade_formset
-            }
+            print(pessoa_form.errors)
+            print(contato_form.errors)
+            print(endereco_form.errors)
+            print(curriculo_form.errors)
+            print(formacao_formset.errors)
+            print(experiencia_formset.errors)
+            print(habilidade_formset.errors)
+    else:
+        pessoa_form = PessoaForm()
+        contato_form = ContatoForm()
+        endereco_form = EnderecoForm()
+        curriculo_form = CurriculoForm()
+        formacao_formset = FormacaoAcademicaFormSet()
+        experiencia_formset = ExperienciaProfissionalFormSet()
+        habilidade_formset = HabilidadeFormSet()
 
-            return render(request, 'pages/criar_curriculo.html', context)
+    context = {
+        'pessoa_form': pessoa_form,
+        'contato_form': contato_form,
+        'endereco_form': endereco_form,
+        'curriculo_form': curriculo_form,
+        'formacao_formset': formacao_formset,
+        'experiencia_formset': experiencia_formset,
+        'habilidade_formset': habilidade_formset
+    }
+
+    return render(request, 'pages/criar_curriculo.html', context)
         
 #views da edição do curriculo
 @login_required(login_url=reverse_lazy('curriculo:login'))

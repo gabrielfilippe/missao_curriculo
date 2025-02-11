@@ -69,7 +69,7 @@ class CurriculoAdmin(admin.ModelAdmin):
     get_formacoes_academicas.short_description = 'Formações Acadêmicas'
 
     def get_experiencias_profissionais(self, obj):
-        return mark_safe('<br>'.join([experiencia.empresa.nome for experiencia in obj.experienciaprofissional_set.all()]) if obj.experienciaprofissional_set.all() else '-')
+        return mark_safe('<br>'.join([experiencia.empresa for experiencia in obj.experienciaprofissional_set.all()]) if obj.experienciaprofissional_set.all() else '-')
     
     get_experiencias_profissionais.short_description = 'Experiências Profissionais'
 
